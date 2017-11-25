@@ -2,9 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
-themes
 public
-
+*.Rproj
 ####### R
 
 
