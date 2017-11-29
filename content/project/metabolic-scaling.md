@@ -1,19 +1,17 @@
 +++
-# Date this page was created.
-date = "2017-11-30"
-
-# Project title.
 title = "The importance of body size - scaling of physiological traits in insects"
-
-# Project summary to display on homepage.
-summary = "Biological phenomena occur across wide scales in space, time, and organisational complexity. Molecules, which are small, quickly transforming units, exhibit new emergent properties when they are arranged into ecosystems. These properties of ecosystems, such as species diversity, distribution, standing biomass, or rates of nutrient turnover involve large spatial and temporal scales, as well as many underlying processes that make their study inherently complex. Integration across disciplines and across levels of biological organisation is one of the grand challenges in biology. Towards this end, novel methods are required so that cross-disciplinary phenomena can be quantified using a common metric. Energy and mass are two universal currencies that are able to cut through the hierarchy of biology, which must be both conserved irrespective to the scale of inquiry."
-
-# Optional image to display on homepage (relative to `static/img/` folder).
-image_preview = "metabolic.jpg"
+date = 2017-11-30T10:51:28+11:00
+draft = false
 
 # Tags: can be used for filtering projects.
 # Example: `tags = ["machine-learning", "deep-learning"]`
 tags = ["metabolic-scaling"]
+
+# Project summary to display on homepage.
+summary = "Biological phenomena occur across wide scales in space, time, and organisational complexity. Molecules, which are small, quickly transforming units, exhibit new emergent properties when they are arranged into ecosystems. These properties of ecosystems, such as species diversity, distribution, standing biomass, or rates of nutrient turnover involve large spatial and temporal scales, as well as many underlying processes that make their study inherently complex. Integration across disciplines and across levels of biological organisation is one of the grand challenges in biology. Towards this end, novel methods are required so that cross-disciplinary phenomena can be quantified using a common metric. Energy and mass are two universal currencies that are able to cut through the hierarchy of biology, which must be both conserved irrespective to the scale of inquiry."
+
+# Optional image to display on homepage.
+image_preview = "metabolic.png"
 
 # Optional external URL for project (replaces project detail page).
 external_link = ""
@@ -21,12 +19,17 @@ external_link = ""
 # Does the project detail page use math formatting?
 math = true
 
-# Optional featured image (relative to `static/img/` folder).
+# Does the project detail page use source code highlighting?
+highlight = true
+
+# Featured image
+# Place your image in the `static/img/` folder and reference its filename below, e.g. `image = "example.jpg"`.
 [header]
 image = "metabolic.png"
-caption = "Oil painting done as an illustration for a scientific article in the journal American Naturalist. The painting represents how, for insect species that undergo metamorphosis, the relationship between metabolic rate and mass varies greatly across life stages.  The insect in the painting is the Cecropia Moth (Hyalophora cecropia) on a dogwood tree. To interpret this painting, you can imagine an x axis along the bottom that shows mass increasing from left to right, and a y axis along the side that shows metabolic rate (a measure of how much energy you are using to maintain your body, grow and reproduce) increasing from bottom to top. The shape of each of the three branches (sporting eggs, caterpillar or pupa) show the relationship between mass and metabolic rate for each of those three life stages.  A more detailed explanation can be found here (http://eliap.deviantart.com/art/Patterns-of-metabolic-rate-in-insects-529674728)"
+caption = "Oil painting done as an illustration for a scientific article in the journal American Naturalist. The painting represents how, for insect species that undergo metamorphosis, the relationship between metabolic rate and mass varies greatly across life stages.  The insect in the painting is the Cecropia Moth (Hyalophora cecropia) on a dogwood tree. To interpret this painting, you can imagine an x axis along the bottom that shows mass increasing from left to right, and a y axis along the side that shows metabolic rate (a measure of how much energy you are using to maintain your body, grow and reproduce) increasing from bottom to top. The shape of each of the three branches (sporting eggs, caterpillar or pupa) show the relationship between mass and metabolic rate for each of those three life stages."
 
 +++
+
 
 Biological phenomena occur across wide scales in space, time, and organisational complexity. Molecules, which are small, simple, quickly transforming units, exhibit new emergent properties when they are arranged into ecosystems. These properties of ecosystems, such as species diversity, distribution, standing biomass, or rates of nutrient turnover involve large spatial and temporal scales, and many underlying processes that make their study inherently complex. Integration across disciplines and across levels of biological organisation is one of the grand challenges in biology. Towards this end, novel methods are required so that cross-disciplinary phenomena can be quantified using a common metric. One universal currency that is able to cut through the hierarchy of biology is the currency of mass and energy, which must be conserved irrespective to the scale of inquiry. 
 
@@ -41,4 +44,3 @@ The uptake of resources from the environment is a basic feature of all life. Con
 Finally, I use the principles of DEB theory to explore the universality of growth patterns in insects. Insects are typified by their small size, large numbers, impressive reproductive output, and rapid growth. However, insect growth is not simply rapid; rather, insects follow a qualitatively distinct trajectory to many other animals. I present a mechanistic growth model for insects and show that the up-regulation of assimilation during the growth phase can explain the near-exponential growth trajectory of insects. The presented model is tested against growth data on 50 insects, and compared against other mechanistic growth models. Unlike the other mechanistic models, our growth model predicts energy reserves per biomass to increase with age, which implies a higher production efficiency and energy density of biomass in later instars. These predictions are tested against data compiled from the literature whereby it is confirmed that insects increase their production efficiency (by 25 percentage points) and energy density (by 3 J/mg) between hatching and the attainment of full size. The model suggests that insects achieve greater production efficiencies and enhanced growth rates by up-regulating assimilation and increasing energy reserves per biomass, which are less costly to maintain than structural biomass. Our findings illustrate how the explanatory and predictive power of mechanistic growth models comes from their grounding in underlying biological processes.
 
 These applications of DEB theory highlight novel insights on some well-studied, but unresolved issues in biology. More importantly, the theoretical basis of these insights demonstrates the value of a quantitative framework for metabolic organisation, which I confirm holds true even at coarser scales of analysis. While the grand challenge of unification across scales in biology still remains, the results of this thesis hold much promise for metabolic theory as a platform for synthesis.       
-
