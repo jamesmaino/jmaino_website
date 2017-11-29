@@ -30,7 +30,7 @@ filter_default = 0
   
 [[filter]]
   name = "metabolic-scaling"
-  tag = ".metabolic-scaling"
+  tag = "metabolic-scaling"
 
 [[filter]]
   name = "Other"
