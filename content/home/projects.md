@@ -29,8 +29,8 @@ filter_default = 0
   tag = "*"
   
 [[filter]]
-  name = "Deep Learning"
-  tag = ".deep-learning"
+  name = "metabolic-scaling"
+  tag = ".metabolic-scaling"
 
 [[filter]]
   name = "Other"

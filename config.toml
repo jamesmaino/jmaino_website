@@ -250,7 +250,7 @@ defaultContentLanguageInSubdir = false
   name = "Projects"
   url = "#projects"
   weight = 4
-
+  
 #[[menu.main]]
 #  name = "Teaching"
 #  url = "#teaching"
