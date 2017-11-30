@@ -32,6 +32,11 @@ html {
   }
 }
 
+code .MathJax {
+  color: black;
+  background-color: white;
+}
+
 body {
   font-family: inherit;
   font-size: 1rem;
