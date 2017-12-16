@@ -17,7 +17,7 @@ authors = ["James L. Maino", "Jacinta. D. Kong", "Ary A. Hoffmann", "Madeleine G
 publication_types = ["2"]
 
 # Publication name and optional abbreviated version.
-publication = "In *Current Opinions in Insect Science*, IEEE."
+publication = "In *Current Opinions in Insect Science*"
 publication_short = "In *COIS*"
 
 # Abstract and optional shortened version.

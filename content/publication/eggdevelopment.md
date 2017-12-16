@@ -18,7 +18,7 @@ authors = ["James L. Maino", "Elia I. Pirtle",
 publication_types = ["2"]
 
 # Publication name and optional abbreviated version.
-publication = "In *Functional Ecology*, IEEE."
+publication = "In *Functional Ecology*"
 # publication_short = "In *Functional Ecology*"
 
 # Abstract and optional shortened version.

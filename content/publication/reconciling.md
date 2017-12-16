@@ -20,7 +20,7 @@ authors = ["James L. Maino",
 publication_types = ["2"]
 
 # Publication name and optional abbreviated version.
-publication = "In *Journal of Animal Ecology*, IEEE."
+publication = "In *Journal of Animal Ecology*"
 publication_short = "In *JAnE*"
 
 # Abstract and optional shortened version.

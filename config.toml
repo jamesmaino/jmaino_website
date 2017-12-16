@@ -203,6 +203,11 @@ defaultContentLanguageInSubdir = false
   #   Full list: https://jpswalsh.github.io/academicons/
 
   [[params.social]]
+    icon = "linkedin"
+    icon_pack = "fa"
+    link = "https://www.linkedin.com/in/james-maino-431ab1a8/"
+
+  [[params.social]]
     icon = "envelope"
     icon_pack = "fa"
     link = "mailto:jamesmaino@gmail.com"
@@ -221,7 +226,6 @@ defaultContentLanguageInSubdir = false
     icon = "github"
     icon_pack = "fa"
     link = "//github.com/jamesmaino"
-
 
 # Navigation Links
 #   To link a homepage widget, specify the URL as a hash `#` followed by the filename of the
