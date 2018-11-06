@@ -1,6 +1,12 @@
+# to do 
+# new projects RWA, VLM, SWD
+# blog posts: logistic growth
+# shiny apps
+# cv  
+
 baseurl = "/"  # End your URL with a `/` trailing slash, e.g. `https://example.com/`.
 title = "James Maino"
-copyright = "&copy; 2017 James Maino"
+copyright = "&copy; 2018 James Maino"
 theme = "hugo-academic"
 enableEmoji = true
 footnotereturnlinkcontents = "<sup>^</sup>"
@@ -40,7 +46,7 @@ defaultContentLanguageInSubdir = false
 
   # Your details.
   name = "James Maino"
-  role = "Senior Researcher (Pest Forecasting)"
+  role = "Researcher Scientist (Pest Forecasting)"
 
   # Organizations/Affiliations.
   #   Separate multiple entries with a comma, using the form: `[ {name="Org1", url=""}, {name="Org2", url=""} ]`.

@@ -1,0 +1,281 @@
+---
+title: Deriving simple population growth functions
+author: James Maino
+date: '2018-11-06'
+slug: population-growth-modelling
+categories: []
+tags: ["ecology", "population", "exponential", "logistic", "derivation"]
+summary: "A quick note on deriving some useful functions for unconstrained and constrained populations growth."
+header:
+  caption: 'Image credit: [**James Maino**] (https://scholar.google.com.au/citations?user=jHD4R20AAAAJ&hl=en)'
+  image: '20170902_130200.jpg'
+---
+
+
+
+<p>Let’s derive some population growth functions!</p>
+<div id="how-to-grow" class="section level2">
+<h2>How to grow</h2>
+<p>Populations grow. They grow positively, if rates of reproduction &gt; mortality, or negatively, if reproduction &lt; mortality. For an unconstrained population of size <span class="math inline">\(N\)</span> at a stable age-class distribution, this rate of growth is referred to as the <em>intrinsic growth rate</em>, <span class="math inline">\(r\)</span> and has the units individuals per individual per time <span class="math inline">\(N.N^{-1}.t^{-1}\)</span> . Thus the change in population size with time is simply:</p>
+<p><span class="math display">\[\frac{dN}{dt} = rN\]</span></p>
+<p>This is a rudimentary first-order differential equation which can be solved in a few simple steps.</p>
+<p><span class="math display">\[\int 1/N dN = \int r dt\]</span> <span class="math display">\[ln|N| = rt + C_0\]</span> <span class="math display">\[N = C_1 e^{rt}\]</span></p>
+<p>Solving <span class="math inline">\(C_1\)</span> for <span class="math inline">\(N = N_0\)</span> at <span class="math inline">\(t = t_0\)</span>:</p>
+<p><span class="math display">\[N = N_0 e^{rt}\]</span></p>
+<p>While the parameter <span class="math inline">\(r\)</span> hopefully makes conceptual sense, it is not straightforward to measure for a given species, as it will depend on the age structure (all juveniles means no reproduction), resource availability (food for growth), and environmental temperature (slow cold ectotherms). The age structure is assumed to be in a steady state, i.e. the relative proportion of different age classes does not change. Likewise, resource availability and other environmental conditions such as temperature are also taken as fixed. Steady state can be illustrated with a simple transition matrix model. Although there are initially 1000 individuals in the first age class (e.g. a mass hatching event triggered by rain), the age classes eventually stabilise.</p>
+<pre class="r"><code>trans = matrix(
+  c(0.0, 0.3, 0.3,
+    0.3, 0.3, 0.0,
+    3.0, 0.0, 0.0),
+  ncol = 3,byrow = T
+  )
+rownames(trans) = c(&#39;V1&#39;,&#39;V2&#39;,&#39;V3&#39;)
+colnames(trans) = c(&#39;V1&#39;,&#39;V2&#39;,&#39;V3&#39;)
+trans</code></pre>
+<pre><code>##     V1  V2  V3
+## V1 0.0 0.3 0.3
+## V2 0.3 0.3 0.0
+## V3 3.0 0.0 0.0</code></pre>
+<pre class="r"><code>Tmax = 200
+N = matrix(rep(0, Tmax*3), nrow = 3)
+N[1,1] = 1000
+for(t in 2:Tmax) N[, t] = N[, t-1] %*% trans</code></pre>
+<p><img src="/post/2018-11-06-population-growth-modelling_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="measuring-intrinsic-growth-rate" class="section level2">
+<h2>Measuring intrinsic growth rate</h2>
+<p>There are a number of ways that <span class="math inline">\(r\)</span> can be measured, but they all rely on the above assumptions.</p>
+<div id="regressing-population-vs.time" class="section level3">
+<h3>Regressing population vs. time</h3>
+<p>The most direct way to access <span class="math inline">\(r\)</span> is to look at how an unconstrained growing population changes through time. Here we will simulate some data with <span class="math inline">\(r = 1\)</span> accross ten years and see if we can recover it statistically.</p>
+<pre class="r"><code>N0 = 1
+r = 1
+t = 0:10
+df = data.frame(
+      t,
+      N = N0*exp(r*t)
+     )
+knitr::kable(df,digits = 0, align = c(&#39;r&#39;,&#39;r&#39;,&#39;r&#39;))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">t</th>
+<th align="right">N</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">7</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">20</td>
+</tr>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">55</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">148</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">403</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="right">1097</td>
+</tr>
+<tr class="odd">
+<td align="right">8</td>
+<td align="right">2981</td>
+</tr>
+<tr class="even">
+<td align="right">9</td>
+<td align="right">8103</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">22026</td>
+</tr>
+</tbody>
+</table>
+<p>To estimate <span class="math inline">\(r\)</span> through regression, notice that a log tranformation of the growth function results in:</p>
+<p><span class="math display">\[\ln N = \ln  (N_0 e^{rt})\]</span> <span class="math display">\[\ln N = \ln N_0 + rt\]</span> This is a linear regression with an intercept <span class="math inline">\(\ln N_0\)</span> and slope <span class="math inline">\(r\)</span> which we can recover through fitting a simple linear model.</p>
+<pre class="r"><code>lm1 = lm(log(N) ~ t, data = df)
+coef(lm1)</code></pre>
+<pre><code>##  (Intercept)            t 
+## 1.071183e-15 1.000000e+00</code></pre>
+<p><img src="/post/2018-11-06-population-growth-modelling_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="measuring-vital-rates-and-building-a-life-table" class="section level3">
+<h3>Measuring vital rates and building a life table</h3>
+<p>Old school population demographers also built life tables for population, which include direct measurements of mortality, and reproduction to calculate <span class="math inline">\(r\)</span>.</p>
+<p>Let’s use an example published by Carey and Bradley<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> of the Atlantic Spider mite. The below table shows for each day <span class="math inline">\(x\)</span> the proportion surviving <span class="math inline">\(P(x)\)</span> and mean daily reproduction rate per individual for a synchronised cohort through time starting at egg lay.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">x</th>
+<th align="right">P(x)</th>
+<th align="right">m(x)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">1.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">1.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="right">3</td>
+<td align="right">1.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">1.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="right">5</td>
+<td align="right">1.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="odd">
+<td align="right">6</td>
+<td align="right">1.00</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="right">1.00</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="odd">
+<td align="right">8</td>
+<td align="right">1.00</td>
+<td align="right">3.53</td>
+</tr>
+<tr class="even">
+<td align="right">9</td>
+<td align="right">1.00</td>
+<td align="right">7.43</td>
+</tr>
+<tr class="odd">
+<td align="right">10</td>
+<td align="right">0.96</td>
+<td align="right">7.24</td>
+</tr>
+<tr class="even">
+<td align="right">11</td>
+<td align="right">0.85</td>
+<td align="right">4.31</td>
+</tr>
+<tr class="odd">
+<td align="right">12</td>
+<td align="right">0.73</td>
+<td align="right">6.57</td>
+</tr>
+<tr class="even">
+<td align="right">13</td>
+<td align="right">0.68</td>
+<td align="right">5.59</td>
+</tr>
+<tr class="odd">
+<td align="right">14</td>
+<td align="right">0.50</td>
+<td align="right">4.86</td>
+</tr>
+<tr class="even">
+<td align="right">15</td>
+<td align="right">0.46</td>
+<td align="right">4.70</td>
+</tr>
+<tr class="odd">
+<td align="right">16</td>
+<td align="right">0.38</td>
+<td align="right">3.67</td>
+</tr>
+<tr class="even">
+<td align="right">17</td>
+<td align="right">0.33</td>
+<td align="right">4.26</td>
+</tr>
+<tr class="odd">
+<td align="right">18</td>
+<td align="right">0.29</td>
+<td align="right">3.93</td>
+</tr>
+<tr class="even">
+<td align="right">19</td>
+<td align="right">0.25</td>
+<td align="right">2.48</td>
+</tr>
+<tr class="odd">
+<td align="right">20</td>
+<td align="right">0.23</td>
+<td align="right">3.83</td>
+</tr>
+<tr class="even">
+<td align="right">21</td>
+<td align="right">0.21</td>
+<td align="right">5.09</td>
+</tr>
+<tr class="odd">
+<td align="right">22</td>
+<td align="right">0.19</td>
+<td align="right">3.30</td>
+</tr>
+<tr class="even">
+<td align="right">23</td>
+<td align="right">0.15</td>
+<td align="right">2.34</td>
+</tr>
+<tr class="odd">
+<td align="right">24</td>
+<td align="right">0.09</td>
+<td align="right">1.65</td>
+</tr>
+<tr class="even">
+<td align="right">25</td>
+<td align="right">0.04</td>
+<td align="right">1.10</td>
+</tr>
+</tbody>
+</table>
+<p>Firstly, we estimate net generational reproduction <span class="math inline">\(R_0 = \sum_{x} P(x)m(x) = 42.8\)</span> . As not all individuals will reproduce at <span class="math inline">\(P(x)\)</span>, i.e. some will die, this value is scaled by <span class="math inline">\(m(x)\)</span>. Now let’s plot mortality and reproduction data. But how fast does a population grow by this factor?</p>
+<p><img src="/post/2018-11-06-population-growth-modelling_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>An analytical estimate of r from this data relies on the Lotka equation.</p>
+<p><span class="math display">\[\sum_{x=\alpha}^\beta P(x)m(x)e^{-rx} = 1\]</span></p>
+<p>Here we can set <span class="math inline">\(x = T\)</span> where</p>
+<p><span class="math display">\[T = \frac{\sum_{x}xP(x)m(x)}{\sum_{x}P(x)m(x)}\]</span> Substituting into the Lotka equation and recognisign <span class="math inline">\(\sum_{x}P(x)m(x) = R_0\)</span> we get :</p>
+<p><span class="math display">\[e^{rT} \approx R_0\]</span> <span class="math display">\[r \approx \ln R_0/ T\]</span></p>
+<p>Alternatively, we can <a href="https://scipython.com/book/chapter-8-scipy/examples/solving-the-euler-lotka-equation/">solve this equation numerically.</a></p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Carey, J.R. and Bradley, J.W., 1982. Developmental rates, vital schedules, sex ratios and life tables for Tetranychus urticae, T. turkestani and T. pacificus (Acarina: Tetranychidae) on cotton. Acarologia, 23(4), pp.333-345.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>

@@ -1,0 +1,169 @@
+---
+title: Deriving simple population growth functions
+author: James Maino
+date: '2018-11-06'
+slug: population-growth-modelling
+categories: []
+tags: ["ecology", "population", "exponential", "logistic", "derivation"]
+summary: "A quick note on deriving some useful functions for unconstrained and constrained populations growth."
+header:
+  caption: 'Image credit: [**James Maino**] (https://scholar.google.com.au/citations?user=jHD4R20AAAAJ&hl=en)'
+  image: '20170902_130200.jpg'
+---
+
+```{r, echo=F, message=F,warning=F}
+library(tidyverse)
+```
+
+
+Let's derive some population growth functions!
+
+## How to grow
+
+Populations grow. They grow positively, if rates of reproduction > mortality, or negatively, if reproduction < mortality. For an unconstrained population of size $N$ at a stable age-class distribution, this rate of growth is referred to as the *intrinsic growth rate*, $r$ and has the units individuals per individual per time $N.N^{-1}.t^{-1}$ . Thus the change in population size with time is simply: 
+
+$$\frac{dN}{dt} = rN$$ 
+
+This is a rudimentary first-order differential equation which can be solved in a few simple steps. 
+
+$$\int 1/N dN = \int r dt$$ 
+$$ln|N| = rt + C_0$$ 
+$$N = C_1 e^{rt}$$
+
+Solving $C_1$ for $N = N_0$ at $t = t_0$:
+
+$$N = N_0 e^{rt}$$
+
+While the parameter $r$ hopefully makes conceptual sense, it is not straightforward to measure for a given species, as it will depend on the age structure (all juveniles means no reproduction), resource availability (food for growth), and environmental temperature (slow cold ectotherms). The age structure is assumed to be in a steady state, i.e. the relative proportion of different age classes does not change. Likewise, resource availability and other environmental conditions such as temperature are also taken as fixed. Steady state can be illustrated with a simple transition matrix model. Although there are initially 1000 individuals in the first age class (e.g. a mass hatching event triggered by rain), the age classes eventually stabilise. 
+
+```{r}
+trans = matrix(
+  c(0.0, 0.3, 0.3,
+    0.3, 0.3, 0.0,
+    3.0, 0.0, 0.0),
+  ncol = 3,byrow = T
+  )
+rownames(trans) = c('V1','V2','V3')
+colnames(trans) = c('V1','V2','V3')
+trans
+
+Tmax = 200
+N = matrix(rep(0, Tmax*3), nrow = 3)
+N[1,1] = 1000
+for(t in 2:Tmax) N[, t] = N[, t-1] %*% trans
+```
+
+```{r, echo = FALSE}
+# plot
+ages = as.data.frame(t(N))
+ages$total = rowSums(ages)
+ages$t = 1:Tmax
+agesl = gather(ages, age.class, value, -t, - total)
+ggplot(agesl) + 
+  geom_area(aes(t, value/total, fill = age.class)) +
+  ylab('proportion')+
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = rgb(0.2,0.21,0.27)),
+    text = element_text(colour = 'grey'), 
+    axis.text = element_text(colour = 'grey'), 
+    panel.grid = element_line(colour = 'grey')
+  )
+```
+
+## Measuring intrinsic growth rate
+There are a number of ways that $r$ can be measured, but they all rely on the above assumptions.
+
+### Regressing population vs. time 
+The most direct way to access $r$ is to look at how an unconstrained growing population changes through time. Here we will simulate some data with $r = 1$ accross ten years and see if we can recover it statistically. 
+
+```{r, eval = TRUE, dev.args = list(bg = 'transparent')}
+N0 = 1
+r = 1
+t = 0:10
+df = data.frame(
+      t,
+      N = N0*exp(r*t)
+     )
+knitr::kable(df,digits = 0, align = c('r','r','r'))
+
+```
+
+To estimate $r$ through regression, notice that a log tranformation of the growth function results in:
+
+$$\ln N = \ln  (N_0 e^{rt})$$
+$$\ln N = \ln N_0 + rt$$
+This is a linear regression with an intercept $\ln N_0$ and slope $r$ which we can recover through fitting a simple linear model.
+
+
+```{r, eval = TRUE, dev.args = list(bg = 'transparent')}
+
+lm1 = lm(log(N) ~ t, data = df)
+coef(lm1)
+```
+
+```{r, echo = FALSE}
+# plot 
+df$pred = predict(lm1)
+ggplot(df) +
+  geom_point(aes(t,N), colour = 'red', size = 2) + 
+  geom_line(aes(t,exp(pred)), colour = 'grey') + 
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = rgb(.2,.21,.27)),
+    text = element_text(colour = 'grey'), 
+    axis.text = element_text(colour = 'grey'), 
+    panel.grid = element_line(colour = 'grey')
+  ) +
+  scale_y_log10()
+  
+```
+
+### Measuring vital rates and building a life table
+Old school population demographers also built life tables for population, which include direct measurements of mortality, and reproduction to calculate $r$.
+
+Let's use an example published by Carey and Bradley[^1] of the Atlantic Spider mite. The below table shows for each day $x$ the proportion surviving $P(x)$ and mean daily reproduction rate per individual for a synchronised cohort through time starting at egg lay.   
+
+```{r, message = F, echo = F, warning = F}
+mite = read_csv('../../data/AtlanticSpiderMite_CareyBradley1982.csv')
+knitr::kable(mite, align = c('r','r','r'))
+
+```
+
+Firstly, we estimate net generational reproduction $R_0 = \sum_{x} P(x)m(x) = 42.8$ . As not all individuals will reproduce at $P(x)$, i.e. some will die, this value is scaled by $m(x)$. Now let's plot mortality and reproduction data. But how fast does a population grow by this factor?
+
+```{r, echo = FALSE}
+# plot 
+
+mite$`P(x).m(x)` = mite$`P(x)`*mite$`m(x)`
+dw = mite %>% gather(variable, value, -x)
+ggplot(dw) +
+  geom_point(aes(x,value, colour = variable), size = 2) +  
+  geom_line(aes(x,value, colour = variable)) +
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = rgb(.2,.21,.27)),
+    text = element_text(colour = 'grey'), 
+    axis.text = element_text(colour = 'grey'), 
+    panel.grid = element_line(colour = 'grey')
+  )
+  
+```
+
+An analytical estimate of r from this data relies on the Lotka equation.
+
+$$\sum_{x=\alpha}^\beta P(x)m(x)e^{-rx} = 1$$
+
+Here we can set $x = T$ where 
+
+$$T = \frac{\sum_{x}xP(x)m(x)}{\sum_{x}P(x)m(x)}$$
+Substituting into the Lotka equation and recognisign $\sum_{x}P(x)m(x) = R_0$ we get  :
+
+
+$$e^{rT} \approx R_0$$
+$$r \approx \ln R_0/ T$$
+
+Alternatively, we can [solve this equation numerically.](https://scipython.com/book/chapter-8-scipy/examples/solving-the-euler-lotka-equation/)
+
+[^1]: Carey, J.R. and Bradley, J.W., 1982. Developmental rates, vital schedules, sex ratios and life tables for Tetranychus urticae, T. turkestani and T. pacificus (Acarina: Tetranychidae) on cotton. Acarologia, 23(4), pp.333-345.
+
