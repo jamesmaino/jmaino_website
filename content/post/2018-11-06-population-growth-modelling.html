@@ -47,80 +47,105 @@ for(t in 2:Tmax) N[, t] = N[, t-1] %*% trans</code></pre>
 <p>There are a number of ways that <span class="math inline">\(r\)</span> can be measured, but they all rely on the above assumptions.</p>
 <div id="regressing-population-vs.time" class="section level3">
 <h3>Regressing population vs. time</h3>
-<p>The most direct way to access <span class="math inline">\(r\)</span> is to look at how an unconstrained growing population changes through time. Here we will simulate some data with <span class="math inline">\(r = 1\)</span> accross ten years and see if we can recover it statistically.</p>
-<pre class="r"><code>N0 = 1
-r = 1
-t = 0:10
-df = data.frame(
-      t,
-      N = N0*exp(r*t)
+<p>The most direct way to access <span class="math inline">\(r\)</span> is to look at how an unconstrained growing population changes through time. Let’s use the numbers from our previous matrix model simulation.</p>
+<pre class="r"><code>df = data.frame(
+      t = 0:(Tmax-1),
+      N = colSums(N)
      )
-knitr::kable(df,digits = 0, align = c(&#39;r&#39;,&#39;r&#39;,&#39;r&#39;))</code></pre>
+knitr::kable(df[seq(0,200, by = 20),],digits = 0, align = c(&#39;r&#39;,&#39;r&#39;,&#39;r&#39;))</code></pre>
 <table>
 <thead>
 <tr class="header">
+<th></th>
 <th align="right">t</th>
 <th align="right">N</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="right">0</td>
-<td align="right">1</td>
+<td>20</td>
+<td align="right">19</td>
+<td align="right">913</td>
 </tr>
 <tr class="even">
-<td align="right">1</td>
-<td align="right">3</td>
+<td>40</td>
+<td align="right">39</td>
+<td align="right">1302</td>
 </tr>
 <tr class="odd">
-<td align="right">2</td>
-<td align="right">7</td>
+<td>60</td>
+<td align="right">59</td>
+<td align="right">1787</td>
 </tr>
 <tr class="even">
-<td align="right">3</td>
-<td align="right">20</td>
+<td>80</td>
+<td align="right">79</td>
+<td align="right">2405</td>
 </tr>
 <tr class="odd">
-<td align="right">4</td>
-<td align="right">55</td>
+<td>100</td>
+<td align="right">99</td>
+<td align="right">3204</td>
 </tr>
 <tr class="even">
-<td align="right">5</td>
-<td align="right">148</td>
+<td>120</td>
+<td align="right">119</td>
+<td align="right">4245</td>
 </tr>
 <tr class="odd">
-<td align="right">6</td>
-<td align="right">403</td>
+<td>140</td>
+<td align="right">139</td>
+<td align="right">5607</td>
 </tr>
 <tr class="even">
-<td align="right">7</td>
-<td align="right">1097</td>
+<td>160</td>
+<td align="right">159</td>
+<td align="right">7392</td>
 </tr>
 <tr class="odd">
-<td align="right">8</td>
-<td align="right">2981</td>
+<td>180</td>
+<td align="right">179</td>
+<td align="right">9738</td>
 </tr>
 <tr class="even">
-<td align="right">9</td>
-<td align="right">8103</td>
-</tr>
-<tr class="odd">
-<td align="right">10</td>
-<td align="right">22026</td>
+<td>200</td>
+<td align="right">199</td>
+<td align="right">12821</td>
 </tr>
 </tbody>
 </table>
 <p>To estimate <span class="math inline">\(r\)</span> through regression, notice that a log tranformation of the growth function results in:</p>
 <p><span class="math display">\[\ln N = \ln  (N_0 e^{rt})\]</span> <span class="math display">\[\ln N = \ln N_0 + rt\]</span> This is a linear regression with an intercept <span class="math inline">\(\ln N_0\)</span> and slope <span class="math inline">\(r\)</span> which we can recover through fitting a simple linear model.</p>
-<pre class="r"><code>lm1 = lm(log(N) ~ t, data = df)
+<pre class="r"><code>lm1 = lm(log(N) ~ t , data = df)
 coef(lm1)</code></pre>
-<pre><code>##  (Intercept)            t 
-## 1.071183e-15 1.000000e+00</code></pre>
+<pre><code>## (Intercept)           t 
+##  6.71771143  0.01380229</code></pre>
 <p><img src="/post/2018-11-06-population-growth-modelling_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Notice that the recovered intercept <span class="math inline">\(e^{6.72} = 828.8\)</span> was actually lower than the real values of 1000. This was due to the age distribution not being in steady state, and the population not growing properly exponential.</p>
+<p>Now let’s try and run the same matrix model simulation but with the 1000 individuals distributed across age classes at the steady state proportions.</p>
+<pre class="r"><code>N1_stable = 1000*N[,Tmax]/sum(N[,Tmax])
+N = matrix(rep(0, Tmax*3), nrow = 3)
+N[,1] = N1_stable 
+
+for(t in 2:Tmax) N[, t] = N[, t-1] %*% trans
+
+df = data.frame(
+      t = 0:(Tmax-1),
+      N = colSums(N)
+     )
+
+lm1 = lm(log(N) ~ t , data = df)
+coef(lm1)</code></pre>
+<pre><code>## (Intercept)           t 
+##  6.90853613  0.01372243</code></pre>
+<p>After exponentiating the intercept we are able to recover the initial population size.</p>
+<pre class="r"><code>exp(coef(lm1)[1])</code></pre>
+<pre><code>## (Intercept) 
+##    1000.781</code></pre>
 </div>
 <div id="measuring-vital-rates-and-building-a-life-table" class="section level3">
 <h3>Measuring vital rates and building a life table</h3>
-<p>Old school population demographers also built life tables for population, which include direct measurements of mortality, and reproduction to calculate <span class="math inline">\(r\)</span>.</p>
+<p>Old school population demographers also built life tables for a cohort of individuals followed through life, which include direct measurements of mortality, and reproduction to calculate <span class="math inline">\(r\)</span>.</p>
 <p>Let’s use an example published by Carey and Bradley<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> of the Atlantic Spider mite. The below table shows for each day <span class="math inline">\(x\)</span> the proportion surviving <span class="math inline">\(P(x)\)</span> and mean daily reproduction rate per individual for a synchronised cohort through time starting at egg lay.</p>
 <table>
 <thead>
@@ -264,7 +289,7 @@ coef(lm1)</code></pre>
 </tbody>
 </table>
 <p>Firstly, we estimate net generational reproduction <span class="math inline">\(R_0 = \sum_{x} P(x)m(x) = 42.8\)</span> . As not all individuals will reproduce at <span class="math inline">\(P(x)\)</span>, i.e. some will die, this value is scaled by <span class="math inline">\(m(x)\)</span>. Now let’s plot mortality and reproduction data. But how fast does a population grow by this factor?</p>
-<p><img src="/post/2018-11-06-population-growth-modelling_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="/post/2018-11-06-population-growth-modelling_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <p>An analytical estimate of r from this data relies on the Lotka equation.</p>
 <p><span class="math display">\[\sum_{x=\alpha}^\beta P(x)m(x)e^{-rx} = 1\]</span></p>
 <p>Here we can set <span class="math inline">\(x = T\)</span> where</p>

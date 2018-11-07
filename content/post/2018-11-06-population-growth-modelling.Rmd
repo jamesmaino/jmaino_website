@@ -85,19 +85,6 @@ df = data.frame(
 knitr::kable(df[seq(0,200, by = 20),],digits = 0, align = c('r','r','r'))
 
 ```
-```{r}
-ggplot(df) + 
-  geom_line(aes(t, N), colour = 'red')+
-  theme_minimal() +
-  scale_y_log10() +
-  theme(
-    plot.background = element_rect(fill = rgb(0.2,0.21,0.27)),
-    text = element_text(colour = 'grey'), 
-    axis.text = element_text(colour = 'grey'), 
-    panel.grid = element_line(colour = 'grey')
-  )
-```
-
 
 To estimate $r$ through regression, notice that a log tranformation of the growth function results in:
 
