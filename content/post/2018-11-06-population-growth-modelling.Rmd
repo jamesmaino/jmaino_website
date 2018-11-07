@@ -75,19 +75,29 @@ ggplot(agesl) +
 There are a number of ways that $r$ can be measured, but they all rely on the above assumptions.
 
 ### Regressing population vs. time 
-The most direct way to access $r$ is to look at how an unconstrained growing population changes through time. Here we will simulate some data with $r = 1$ accross ten years and see if we can recover it statistically. 
+The most direct way to access $r$ is to look at how an unconstrained growing population changes through time. Let's use the numbers from our previous matrix model simulation.  
 
 ```{r, eval = TRUE, dev.args = list(bg = 'transparent')}
-N0 = 1
-r = 1
-t = 0:10
 df = data.frame(
-      t,
-      N = N0*exp(r*t)
+      t = 0:(Tmax-1),
+      N = colSums(N)
      )
-knitr::kable(df,digits = 0, align = c('r','r','r'))
+knitr::kable(df[seq(0,200, by = 20),],digits = 0, align = c('r','r','r'))
 
 ```
+```{r}
+ggplot(df) + 
+  geom_line(aes(t, N), colour = 'red')+
+  theme_minimal() +
+  scale_y_log10() +
+  theme(
+    plot.background = element_rect(fill = rgb(0.2,0.21,0.27)),
+    text = element_text(colour = 'grey'), 
+    axis.text = element_text(colour = 'grey'), 
+    panel.grid = element_line(colour = 'grey')
+  )
+```
+
 
 To estimate $r$ through regression, notice that a log tranformation of the growth function results in:
 
@@ -98,7 +108,7 @@ This is a linear regression with an intercept $\ln N_0$ and slope $r$ which we c
 
 ```{r, eval = TRUE, dev.args = list(bg = 'transparent')}
 
-lm1 = lm(log(N) ~ t, data = df)
+lm1 = lm(log(N) ~ t , data = df)
 coef(lm1)
 ```
 
@@ -106,7 +116,7 @@ coef(lm1)
 # plot 
 df$pred = predict(lm1)
 ggplot(df) +
-  geom_point(aes(t,N), colour = 'red', size = 2) + 
+  geom_line(aes(t,N), colour = 'red', alpha = 0.5) + 
   geom_line(aes(t,exp(pred)), colour = 'grey') + 
   theme_minimal() +
   theme(
@@ -119,8 +129,36 @@ ggplot(df) +
   
 ```
 
+Notice that the recovered intercept $e^{6.72} = 828.8$ was actually lower than the real values of 1000. This was due to the  age distribution not being in steady state, and the population not growing properly exponential. 
+
+Now let's try and run the same matrix model simulation but with the 1000 individuals distributed across age classes at the steady state proportions.  
+
+```{r}
+N1_stable = 1000*N[,Tmax]/sum(N[,Tmax])
+N = matrix(rep(0, Tmax*3), nrow = 3)
+N[,1] = N1_stable 
+
+for(t in 2:Tmax) N[, t] = N[, t-1] %*% trans
+
+df = data.frame(
+      t = 0:(Tmax-1),
+      N = colSums(N)
+     )
+
+lm1 = lm(log(N) ~ t , data = df)
+coef(lm1)
+
+```
+
+After exponentiating the intercept we are able to recover the initial population size. 
+
+```{r}
+exp(coef(lm1)[1])
+```
+
+
 ### Measuring vital rates and building a life table
-Old school population demographers also built life tables for population, which include direct measurements of mortality, and reproduction to calculate $r$.
+Old school population demographers also built life tables for a cohort of individuals followed through life, which include direct measurements of mortality, and reproduction to calculate $r$.
 
 Let's use an example published by Carey and Bradley[^1] of the Atlantic Spider mite. The below table shows for each day $x$ the proportion surviving $P(x)$ and mean daily reproduction rate per individual for a synchronised cohort through time starting at egg lay.   
 
@@ -164,6 +202,7 @@ $$e^{rT} \approx R_0$$
 $$r \approx \ln R_0/ T$$
 
 Alternatively, we can [solve this equation numerically.](https://scipython.com/book/chapter-8-scipy/examples/solving-the-euler-lotka-equation/)
+
 
 [^1]: Carey, J.R. and Bradley, J.W., 1982. Developmental rates, vital schedules, sex ratios and life tables for Tetranychus urticae, T. turkestani and T. pacificus (Acarina: Tetranychidae) on cotton. Acarologia, 23(4), pp.333-345.
 

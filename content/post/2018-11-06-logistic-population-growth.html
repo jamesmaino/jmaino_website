@@ -1,0 +1,92 @@
+---
+title: Deriving logistic population growth functions
+author: James Maino
+date: '2018-11-06'
+slug: logistic-growth-modelling
+categories: []
+tags: ["ecology", "population", "exponential", "logistic", "derivation"]
+summary: "When population growth can't go on forever"
+header:
+  caption: 'Image credit: [**James Maino**] (https://scholar.google.com.au/citations?user=jHD4R20AAAAJ&hl=en)'
+  image: '20170801_150934.jpg'
+---
+
+
+
+<p>Let’s derive some more population growth functions!</p>
+<div id="the-logistic-population-growth-function" class="section level2">
+<h2>The logistic population growth function</h2>
+<p>In a previous post we derived a function for population growth based on the vital rates of reproduction and mortality. We assumed that the growth rate was constant with respect to the number of individuals in the population or <span class="math inline">\(\frac{dt}{dN} = rN\)</span>. This led to the unrealistic prediction that populations will grow indefinitely. Of course, populations will eventually run into resource problems (e.g. no food) or other density dependent issues (e.g. over-crowding and disease).</p>
+<p>One way to set un upper limit on population growth is to scale the growth rate <span class="math inline">\(rN\)</span> by a function that is 1 when <span class="math inline">\(N\)</span> is small and 0 when <span class="math inline">\(N\)</span> is big. Here is one such function:</p>
+<p><span class="math inline">\(\frac{dN}{dt} = (1 - N/K)rN\)</span></p>
+<p>When <span class="math inline">\(N\)</span> is small the growth rate is approximately <span class="math inline">\(rN\)</span> but as <span class="math inline">\(N \to K\)</span> the growth rate scales to zero. Thus <span class="math inline">\(K\)</span> can be thought of as the carrying capacity of the population. Before we solve this equation with maths (analytically), let’s solve it using computers (numerically) for <span class="math inline">\(r=0.3\)</span>, and <span class="math inline">\(K=100\)</span> assuming the population started with just 2 individuals.</p>
+<pre class="r"><code>library(deSolve)
+
+parameters &lt;- c(r = 0.3, K = 100)
+state &lt;- c(N = 2)
+logistic &lt;- function(t, state, parameters) {
+  with(as.list(c(state, parameters)), {
+    dN &lt;-  (1 - N / K) * (r * N )
+    list(dN)
+  })
+}
+
+times &lt;- seq(0, 50, by = 0.2)
+sol = as.data.frame(
+  ode(y = state, times = times, func = logistic, parms = parameters)
+)</code></pre>
+<p><img src="/post/2018-11-06-logistic-population-growth_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Wow! That was easy.</p>
+<p>Now that we’ve seen the pretty curve, let’s use our excitement to try and describe the curve with a single equation without derivatives (solve the differential equation for <span class="math inline">\(N\)</span> as a function of <span class="math inline">\(t\)</span> and get rid of the <span class="math inline">\(\frac{dN}{dT}\)</span>).</p>
+<p><span class="math inline">\(\frac{dN}{dt} = (1 - N/K)rN\)</span></p>
+<p>First, separate the variables.</p>
+<p><span class="math inline">\({rdt} = \frac{1}{(1 - N/K)N} {dN}\)</span></p>
+<p>Now we want to split up the fraction into something more managable so we assume there exists some <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> such that:</p>
+<p><span class="math inline">\(\frac{1}{(1 - N/K)N} = \frac{A}{(1 - N/K)} + \frac{B}{N}\)</span></p>
+<p><span class="math inline">\(\frac{1}{(1 - N/K)N} = \frac{AN+B(1 - N/K)}{(1 - N/K)N}\)</span></p>
+<p><span class="math inline">\(1 = AN + B(1 - N/K)\)</span></p>
+<p>When <span class="math inline">\(N=K\)</span>:</p>
+<p><span class="math inline">\(1 = AK + B(1 - K/K)\)</span></p>
+<p><span class="math inline">\(A = 1/K\)</span></p>
+<p>Now substituting <span class="math inline">\(A\)</span> and N = 0:</p>
+<p><span class="math inline">\(1 = (0)/K + B(1 - (0)/K)\)</span></p>
+<p><span class="math inline">\(B = 1, A = 1/K\)</span></p>
+<p>Thus we have:</p>
+<p><span class="math inline">\({rdt} = \frac{1/K}{(1 - N/K)} + \frac{1}{N} {dN}\)</span></p>
+<p>Now integrate both sides:</p>
+<p><span class="math inline">\(\int {rdt} = \int \frac{1/K}{(1 - N/K)} + \frac{1}{N} {dN}\)</span></p>
+<p><span class="math inline">\(rt = \int \frac{1/K}{(1 - N/K)}dN + \int \frac{1}{N} {dN}\)</span></p>
+<p><span class="math inline">\(rt = \int \frac{1/K}{(1 - N/K)}dN + \ln|N|\)</span></p>
+<p>The part <span class="math inline">\(\int \frac{1}{(K - N)}dN\)</span> is a little tricky, but substituting <span class="math inline">\(u = 1 - N/K\)</span> and <span class="math inline">\(du = -1/K dN\)</span> will help.</p>
+<p><span class="math inline">\(\int \frac{1/K}{1 - N/K}dN = \int \frac{-du/dN}{u}dN = \int \frac{-1}{u}du = -\ln|u| =-\ln|1 - N/K|\)</span></p>
+<p>From here we can finish the original integration.</p>
+<p><span class="math inline">\(rt = \int \frac{1/K}{(1 - N/K)}dN + \ln|N| + c\)</span></p>
+<p><span class="math inline">\(rt = -\ln|1 - N/K| + \ln|N| + c\)</span></p>
+<p>As N is strictly positive we can remove the absolute operators. Remembering your logarithm rules <span class="math inline">\(\ln(ab) = \ln(a) + \ln(b)\)</span> we get:</p>
+<p><span class="math inline">\(rt = \ln\frac{cN}{1 - N/K}\)</span></p>
+<p><span class="math inline">\(ce^{rt} = \frac{N}{1 - N/K}\)</span></p>
+<p>We really just want one <span class="math inline">\(N\)</span> so that we can convieniently write the function but for now let’s solve the constant <span class="math inline">\(c\)</span> at <span class="math inline">\(t=0\)</span> and <span class="math inline">\(N=N_0\)</span></p>
+<p><span class="math inline">\(ce^{r(0)} = c = \frac{N_0}{1 - N_0/K} = \frac{KN_0}{K - N_0}\)</span></p>
+<p>Back to solving for <span class="math inline">\(N\)</span>.</p>
+<p><span class="math inline">\(ce^{rt} = \frac{N}{1 - N/K}\)</span></p>
+<p><span class="math inline">\((1 - N/K)ce^{rt} ={N}\)</span></p>
+<p><span class="math inline">\(ce^{rt} - ce^{rt}N/K ={N}\)</span></p>
+<p><span class="math inline">\(ce^{rt} = {N} + ce^{rt}N/K\)</span></p>
+<p><span class="math inline">\(ce^{rt} = N({1} + ce^{rt}/K)\)</span></p>
+<p><span class="math inline">\(N = \frac{ce^{rt}} {({1} + ce^{rt}/K)}\)</span></p>
+<p>Substitute in the constant we solved for earlier.</p>
+<p><span class="math inline">\(N = \frac{\frac{KN_0}{K - N_0}e^{rt}} {({1} + \frac{KN_0}{K - N_0}e^{rt}/K)}\)</span></p>
+<p>And simplify by multiplying through by <span class="math inline">\((K - N_0)e^{rt}\)</span></p>
+<p><span class="math inline">\(N = \frac{KN_0} {{N_0} + (K - N_0)e^{-rt}}\)</span></p>
+<p>Let plot it!</p>
+<pre class="r"><code>r = 0.3
+K = 100
+N0 = 2
+time &lt;- seq(0, 50, by = 0.2)
+sol = data.frame(
+  time,
+  N = K*N0/(N0 + (K - N0)*exp(-r*time))
+)</code></pre>
+<p><img src="/post/2018-11-06-logistic-population-growth_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>All that calculus for the same line <code>deSolve</code> gave us…</p>
+</div>
