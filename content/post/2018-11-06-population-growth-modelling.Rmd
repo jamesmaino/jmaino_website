@@ -1,11 +1,11 @@
 ---
-title: Deriving simple population growth functions
+title: Unconstrained population growth
 author: James Maino
 date: '2018-11-06'
 slug: population-growth-modelling
 categories: []
-tags: ["ecology", "population", "exponential", "logistic", "derivation"]
-summary: "A quick note on deriving some useful functions for unconstrained and constrained populations growth."
+tags: ["ecology", "population", "exponential", "derivation", "stable age distribution", "matrix model"]
+summary: "A quick note on unconstrained populations growth (exponential growth)."
 header:
   caption: 'Image credit: [**James Maino**] (https://scholar.google.com.au/citations?user=jHD4R20AAAAJ&hl=en)'
   image: '20170902_130200.jpg'
@@ -38,9 +38,9 @@ While the parameter $r$ hopefully makes conceptual sense, it is not straightforw
 
 ```{r}
 trans = matrix(
-  c(0.0, 0.3, 0.3,
-    0.3, 0.3, 0.0,
-    3.0, 0.0, 0.0),
+  c(0.00, 0.50, 0.00,
+    0.00, 0.00, 0.50,
+    4.00, 0.00, 0.10),
   ncol = 3,byrow = T
   )
 rownames(trans) = c('V1','V2','V3')
@@ -116,7 +116,7 @@ ggplot(df) +
   
 ```
 
-Notice that the recovered intercept $e^{6.72} = 828.8$ was actually lower than the real values of 1000. This was due to the  age distribution not being in steady state, and the population not growing properly exponential. 
+Notice that the recovered intercept `exp(coef(lm1)[1]) =` `r round(exp(coef(lm1)[1]))` was actually lower than the real values of 1000. This was due to the  age distribution not being in steady state, and the population not growing properly exponential. 
 
 Now let's try and run the same matrix model simulation but with the 1000 individuals distributed across age classes at the steady state proportions.  
 

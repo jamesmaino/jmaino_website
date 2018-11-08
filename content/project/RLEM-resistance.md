@@ -11,7 +11,7 @@ tags = ["RLEM-resistance"]
 summary = "Pest mites are a significant threat to the establishment of grain crops. Some species have become more problematic over the last decade as farming practices have changed, while others are proving difficult to control due to tolerance and insecticide resistance issues. The recent emergence of resistance to synthetic pyrethroids and organophosphates in the redlegged earth mite (RLEM) is of particular concern to the Australian grains industry."
 
 # Optional image to display on homepage.
-image_preview = "static/img/20171008_181138.jpg"
+image_preview = "20171008_181138.jpg"
 
 # Optional external URL for project (replaces project detail page).
 external_link = ""

@@ -10,6 +10,7 @@ weight = 5
 # List your academic interests.
 [interests]
   interests = [
+    "Ecology and evolution",
     "Sustainable agriculture",
     "Pest forecasting",
     "Spatial data analysis"
@@ -36,6 +37,6 @@ weight = 5
 
 # Biography
 
-I research and develops tools that help us better manage some of our most notorious crop pests. I am passionate about food security, environmental sustainability, and biodiversity preservation. My current role at cesar as a Senior Research Scientist provides me a unique opportunity to apply my interests and expertise at the interface of these pressing issues.
+I develop tools to remotely sense and forecast insect population dynamics (with a focus on agricultural pests). I am passionate about sustainable food systems, and biodiversity preservation. I believe enhancing our ability to sense and forecast arthopod populations will help us to both manage pests and improve the situation for those species in decline. 
 
 In my spare time, I enjoy hiking around Australia’s wide and diverse landscapes, while taking note of the smaller natural wonders that lurk underneath my feet. 

@@ -1,11 +1,11 @@
 ---
-title: Deriving simple population growth functions
+title: Unconstrained population growth
 author: James Maino
 date: '2018-11-06'
 slug: population-growth-modelling
 categories: []
-tags: ["ecology", "population", "exponential", "logistic", "derivation"]
-summary: "A quick note on deriving some useful functions for unconstrained and constrained populations growth."
+tags: ["ecology", "population", "exponential", "derivation", "stable age distribution", "matrix model"]
+summary: "A quick note on unconstrained populations growth (exponential growth)."
 header:
   caption: 'Image credit: [**James Maino**] (https://scholar.google.com.au/citations?user=jHD4R20AAAAJ&hl=en)'
   image: '20170902_130200.jpg'
@@ -24,18 +24,18 @@ header:
 <p><span class="math display">\[N = N_0 e^{rt}\]</span></p>
 <p>While the parameter <span class="math inline">\(r\)</span> hopefully makes conceptual sense, it is not straightforward to measure for a given species, as it will depend on the age structure (all juveniles means no reproduction), resource availability (food for growth), and environmental temperature (slow cold ectotherms). The age structure is assumed to be in a steady state, i.e. the relative proportion of different age classes does not change. Likewise, resource availability and other environmental conditions such as temperature are also taken as fixed. Steady state can be illustrated with a simple transition matrix model. Although there are initially 1000 individuals in the first age class (e.g. a mass hatching event triggered by rain), the age classes eventually stabilise.</p>
 <pre class="r"><code>trans = matrix(
-  c(0.0, 0.3, 0.3,
-    0.3, 0.3, 0.0,
-    3.0, 0.0, 0.0),
+  c(0.00, 0.50, 0.00,
+    0.00, 0.00, 0.50,
+    4.00, 0.00, 0.10),
   ncol = 3,byrow = T
   )
 rownames(trans) = c(&#39;V1&#39;,&#39;V2&#39;,&#39;V3&#39;)
 colnames(trans) = c(&#39;V1&#39;,&#39;V2&#39;,&#39;V3&#39;)
 trans</code></pre>
-<pre><code>##     V1  V2  V3
-## V1 0.0 0.3 0.3
-## V2 0.3 0.3 0.0
-## V3 3.0 0.0 0.0</code></pre>
+<pre><code>##    V1  V2  V3
+## V1  0 0.5 0.0
+## V2  0 0.0 0.5
+## V3  4 0.0 0.1</code></pre>
 <pre class="r"><code>Tmax = 200
 N = matrix(rep(0, Tmax*3), nrow = 3)
 N[1,1] = 1000
@@ -65,52 +65,52 @@ knitr::kable(df[seq(0,200, by = 20),],digits = 0, align = c(&#39;r&#39;,&#39;r&#
 <tr class="odd">
 <td>20</td>
 <td align="right">19</td>
-<td align="right">913</td>
+<td align="right">1177</td>
 </tr>
 <tr class="even">
 <td>40</td>
 <td align="right">39</td>
-<td align="right">1302</td>
+<td align="right">2137</td>
 </tr>
 <tr class="odd">
 <td>60</td>
 <td align="right">59</td>
-<td align="right">1787</td>
+<td align="right">4041</td>
 </tr>
 <tr class="even">
 <td>80</td>
 <td align="right">79</td>
-<td align="right">2405</td>
+<td align="right">8262</td>
 </tr>
 <tr class="odd">
 <td>100</td>
 <td align="right">99</td>
-<td align="right">3204</td>
+<td align="right">15973</td>
 </tr>
 <tr class="even">
 <td>120</td>
 <td align="right">119</td>
-<td align="right">4245</td>
+<td align="right">31683</td>
 </tr>
 <tr class="odd">
 <td>140</td>
 <td align="right">139</td>
-<td align="right">5607</td>
+<td align="right">62267</td>
 </tr>
 <tr class="even">
 <td>160</td>
 <td align="right">159</td>
-<td align="right">7392</td>
+<td align="right">122686</td>
 </tr>
 <tr class="odd">
 <td>180</td>
 <td align="right">179</td>
-<td align="right">9738</td>
+<td align="right">241627</td>
 </tr>
 <tr class="even">
 <td>200</td>
 <td align="right">199</td>
-<td align="right">12821</td>
+<td align="right">475851</td>
 </tr>
 </tbody>
 </table>
@@ -119,9 +119,9 @@ knitr::kable(df[seq(0,200, by = 20),],digits = 0, align = c(&#39;r&#39;,&#39;r&#
 <pre class="r"><code>lm1 = lm(log(N) ~ t , data = df)
 coef(lm1)</code></pre>
 <pre><code>## (Intercept)           t 
-##  6.71771143  0.01380229</code></pre>
+##  6.30299077  0.03407767</code></pre>
 <p><img src="/post/2018-11-06-population-growth-modelling_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<p>Notice that the recovered intercept <span class="math inline">\(e^{6.72} = 828.8\)</span> was actually lower than the real values of 1000. This was due to the age distribution not being in steady state, and the population not growing properly exponential.</p>
+<p>Notice that the recovered intercept <code>exp(coef(lm1)[1]) =</code> 546 was actually lower than the real values of 1000. This was due to the age distribution not being in steady state, and the population not growing properly exponential.</p>
 <p>Now let’s try and run the same matrix model simulation but with the 1000 individuals distributed across age classes at the steady state proportions.</p>
 <pre class="r"><code>N1_stable = 1000*N[,Tmax]/sum(N[,Tmax])
 N = matrix(rep(0, Tmax*3), nrow = 3)
@@ -137,11 +137,11 @@ df = data.frame(
 lm1 = lm(log(N) ~ t , data = df)
 coef(lm1)</code></pre>
 <pre><code>## (Intercept)           t 
-##  6.90853613  0.01372243</code></pre>
+##  6.90777973  0.03388836</code></pre>
 <p>After exponentiating the intercept we are able to recover the initial population size.</p>
 <pre class="r"><code>exp(coef(lm1)[1])</code></pre>
 <pre><code>## (Intercept) 
-##    1000.781</code></pre>
+##    1000.024</code></pre>
 </div>
 <div id="measuring-vital-rates-and-building-a-life-table" class="section level3">
 <h3>Measuring vital rates and building a life table</h3>

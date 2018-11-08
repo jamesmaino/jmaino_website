@@ -1,5 +1,5 @@
 ---
-title: Deriving logistic population growth functions
+title: Modelling density dependent population growth (logistic growth)
 author: James Maino
 date: '2018-11-06'
 slug: logistic-growth-modelling
@@ -25,7 +25,9 @@ One way to set un upper limit on population growth is to scale the growth rate $
 
 $\frac{dN}{dt} = (1 - N/K)rN$
 
-When $N$ is small the growth rate is approximately $rN$ but as $N \to K$ the growth rate scales to zero. Thus $K$ can be thought of as the carrying capacity of the population.  Before we solve this equation with maths (analytically), let's solve it using computers (numerically) for $r=0.3$, and $K=100$ assuming the population started with just 2 individuals. 
+When $N$ is small the growth rate is approximately $rN$ but as $N \to K$ the growth rate scales to zero. Thus $K$ can be thought of as the carrying capacity of the population. It is important to note that unlike the equation for unconstrained exponential growth, this is a function of convenience rather than having mechanistic interpretation based on how reproduction or mortality depend on population density - it is the simplest function that satisfies our requirements for density dependent growth. 
+
+Before we solve this equation with maths (analytically), let's solve it using computers (numerically) for $r=0.3$, and $K=100$ assuming the population started with just 2 individuals. 
 
 
 ```{r}
