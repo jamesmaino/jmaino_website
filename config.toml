@@ -12,6 +12,7 @@ enableEmoji = true
 footnotereturnlinkcontents = "<sup>^</sup>"
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
 preserveTaxonomyNames = true
+relativeURLs = true
 paginate = 10
 
 # Enable comments by entering your Disqus shortname

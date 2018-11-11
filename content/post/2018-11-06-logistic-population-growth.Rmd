@@ -19,7 +19,7 @@ Let's derive some more population growth functions!
 
 ## The logistic population growth function 
 
-In a previous post we derived a function for population growth based on the vital rates of reproduction and mortality. We assumed that the growth rate was constant with respect to the number of individuals in the population or $\frac{dt}{dN} = rN$. This led to the unrealistic prediction that populations will grow indefinitely. Of course, populations will eventually run into resource problems (e.g. no food) or other density dependent issues (e.g. over-crowding and disease). 
+In [a previous post](/post/population-growth-modelling) we derived a function for population growth based on the vital rates of reproduction and mortality. We assumed that the growth rate was constant with respect to the number of individuals in the population or $\frac{dt}{dN} = rN$. This led to the unrealistic prediction that populations will grow indefinitely. Of course, populations will eventually run into resource problems (e.g. no food) or other density dependent issues (e.g. over-crowding and disease). 
 
 One way to set un upper limit on population growth is to scale the growth rate $rN$ by a function that is 1 when $N$ is small and 0 when $N$ is big. Here is one such function: 
 
