@@ -4,8 +4,8 @@ author: James Maino
 date: '2018-11-06'
 slug: population-growth-modelling
 categories: []
-tags: ["ecology", "population", "exponential", "derivation", "stable age distribution", "matrix model"]
-summary: "A quick note on unconstrained populations growth (exponential growth)."
+tags: ["ecology", "population", "exponential", "derivation", "stable age distribution", "matrix model", "R"]
+# summary: "A quick note on unconstrained populations growth (exponential growth)."
 header:
   caption: 'Image credit: [**James Maino**] (https://scholar.google.com.au/citations?user=jHD4R20AAAAJ&hl=en)'
   image: '20170902_130200.jpg'
@@ -16,7 +16,7 @@ header:
 <p>Let’s derive some population growth functions!</p>
 <div id="how-to-grow" class="section level2">
 <h2>How to grow</h2>
-<p>Populations grow. They grow positively, if rates of reproduction &gt; mortality, or negatively, if reproduction &lt; mortality. For an unconstrained population of size <span class="math inline">\(N\)</span> at a stable age-class distribution, this rate of growth is referred to as the <em>intrinsic growth rate</em>, <span class="math inline">\(r\)</span> and has the units individuals per individual per time <span class="math inline">\(N.N^{-1}.t^{-1}\)</span> . Thus the change in population size with time is simply:</p>
+<p>Populations grow. They grow positively, if rates of reproduction &gt; mortality, or negatively, if reproduction &lt; mortality. For an unconstrained population of size <span class="math inline">\(N\)</span> this diffence in per capita reproduction and mortality is referred to as the <em>intrinsic growth rate</em>, <span class="math inline">\(r\)</span> and has the units individuals per individual per time <span class="math inline">\(N.N^{-1}.t^{-1}\)</span> . The value of <span class="math inline">\(r\)</span> is a constant if the age-distribution is constant (e.g. the proportion of reproductively active individuals in the population does not change). Taking <span class="math inline">\(r\)</span> as constant, the change in population size with time is simply:</p>
 <p><span class="math display">\[\frac{dN}{dt} = rN\]</span></p>
 <p>This is a rudimentary first-order differential equation which can be solved in a few simple steps.</p>
 <p><span class="math display">\[\int 1/N dN = \int r dt\]</span> <span class="math display">\[ln|N| = rt + C_0\]</span> <span class="math display">\[N = C_1 e^{rt}\]</span></p>

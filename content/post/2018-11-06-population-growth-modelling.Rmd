@@ -4,8 +4,8 @@ author: James Maino
 date: '2018-11-06'
 slug: population-growth-modelling
 categories: []
-tags: ["ecology", "population", "exponential", "derivation", "stable age distribution", "matrix model"]
-summary: "A quick note on unconstrained populations growth (exponential growth)."
+tags: ["ecology", "population", "exponential", "derivation", "stable age distribution", "matrix model", "R"]
+# summary: "A quick note on unconstrained populations growth (exponential growth)."
 header:
   caption: 'Image credit: [**James Maino**] (https://scholar.google.com.au/citations?user=jHD4R20AAAAJ&hl=en)'
   image: '20170902_130200.jpg'
@@ -20,7 +20,7 @@ Let's derive some population growth functions!
 
 ## How to grow
 
-Populations grow. They grow positively, if rates of reproduction > mortality, or negatively, if reproduction < mortality. For an unconstrained population of size $N$ at a stable age-class distribution, this rate of growth is referred to as the *intrinsic growth rate*, $r$ and has the units individuals per individual per time $N.N^{-1}.t^{-1}$ . Thus the change in population size with time is simply: 
+Populations grow. They grow positively, if rates of reproduction > mortality, or negatively, if reproduction < mortality. For an unconstrained population of size $N$ this diffence in per capita reproduction and mortality is referred to as the *intrinsic growth rate*, $r$ and has the units individuals per individual per time $N.N^{-1}.t^{-1}$ . The value of $r$ is a constant if the age-distribution is constant (e.g. the proportion of reproductively active individuals in the population does not change). Taking $r$ as constant, the change in population size with time is simply: 
 
 $$\frac{dN}{dt} = rN$$ 
 
