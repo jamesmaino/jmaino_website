@@ -4,7 +4,7 @@
 # shiny apps
 # cv  
 
-baseurl = "http://jamesmaino.com/"  # End your URL with a `/` trailing slash, e.g. `https://example.com/`.
+baseurl = "https://www.jamesmaino.com/"  # End your URL with a `/` trailing slash, e.g. `https://example.com/`.
 title = "James Maino"
 copyright = "&copy; 2018 James Maino"
 theme = "hugo-academic"
