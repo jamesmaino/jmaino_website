@@ -37,6 +37,5 @@ weight = 5
 
 # Biography
 
-I develop tools to remotely sense and forecast insect population dynamics (with a focus on agricultural pests). I am passionate about sustainable food systems, and biodiversity preservation. I believe enhancing our ability to sense and forecast arthopod populations will help us to both manage pests and improve the situation for those species in decline. 
+I develop ecological tools to remotely sense and forecast insect populations (with a focus on plant pests). I am passionate about sustainable food systems and biodiversity preservation and believe enhanced sensing (data generation) and forecasting (data processing) of arthropod populations will improve their management. 
 
-In my spare time, I enjoy hiking around Australia’s wide and diverse landscapes, while taking note of the smaller natural wonders that lurk underneath my feet. 
