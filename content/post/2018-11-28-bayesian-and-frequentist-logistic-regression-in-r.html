@@ -19,6 +19,24 @@ library(rethinking)
 source(&#39;data/useful_scripts/mydarktheme.R&#39;)
 options(mc.cores = parallel::detectCores() - 1)
 rstan_options(auto_write = TRUE)</code></pre>
+<pre><code>## # A tibble: 14 x 6
+## # Groups:   treatment, pop [2]
+##    treatment pop           dose alive  dead total
+##    &lt;chr&gt;     &lt;chr&gt;        &lt;dbl&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##  1 omethoate control      0.007    52     0    52
+##  2 omethoate control      0.07     49     0    49
+##  3 omethoate control      0.7      53     3    56
+##  4 omethoate control      7        36    13    49
+##  5 omethoate control     70         0    51    51
+##  6 omethoate control    700         0    48    48
+##  7 omethoate control   7000         0    51    51
+##  8 omethoate resistant    0.007    49     0    49
+##  9 omethoate resistant    0.07     47     0    47
+## 10 omethoate resistant    0.7      50     0    50
+## 11 omethoate resistant    7        51     0    51
+## 12 omethoate resistant   70         9    37    46
+## 13 omethoate resistant  700         4    45    49
+## 14 omethoate resistant 7000         0    52    52</code></pre>
 <p>The Bernoulli mortality probability <span class="math inline">\(p\)</span> changes with the set of conditions represented by the design matrix <span class="math inline">\(X\)</span>, where rows are observations and columns are covariates. It is convienient to assume <span class="math inline">\(p\)</span> follows the relationship:</p>
 <p><span class="math display">\[p = \frac{1}{1 + e^{-X\boldsymbol{b}}}\]</span></p>
 <p>where <span class="math inline">\(b\)</span> is a vector of coefficients. In this equation, <span class="math inline">\(p\)</span> is constrained to values between 0 and 1. The <span class="math inline">\(Xb\)</span> component is just a linear equation of the form <span class="math inline">\(b_1x_1 + b_2x_2 + ... +b_nx_n\)</span> which can be solved through rearrangement:</p>
@@ -217,10 +235,10 @@ exp(c(x.p - 1.96 * SE, x.p + 1.96 * SE))</code></pre>
 <pre class="r"><code>post = extract.samples(m2, n = 1e5)
 logx50 = -post$a[,1]/post$b[,1]
 exp(mean(logx50))</code></pre>
-<pre><code>## [1] 10.13043</code></pre>
+<pre><code>## [1] 10.13417</code></pre>
 <pre class="r"><code>exp(HPDI(logx50, prob = 0.95))</code></pre>
 <pre><code>##     |0.95     0.95| 
-##  7.184564 14.259132</code></pre>
+##  7.202363 14.310366</code></pre>
 <p>In general, solving for the distribution of arbitrary compound parameters is much more straightforward in a Bayesian context.</p>
 <p>But perhaps the most compelling case for a Bayesian approach with dose responses is when it comes to estimating whether or not the LC50s of both populations are different (and then how different the responses are expressed as a resistance factor). The implications of the covariance structure between the four model paramaters hurts my poor brain. You see many papers getting around this issue by somewhat informally inspecting the overlap of confidence intervals, which is likely to be overconservative. The resistance factor is usaully provided as the ratio of the LC50 values, which usually lacks a confidence interval.</p>
 <pre class="r"><code># LC50 using maximum liklihood
@@ -261,17 +279,17 @@ anova(m1_full, m1_no_pop, test = &#39;LRT&#39;)</code></pre>
 <p>Sampling from our posterior distribution makes this all look like a walk in the park.</p>
 <pre class="r"><code># control LC50
 exp(mean(-post$a[,1]/post$b[,1]))</code></pre>
-<pre><code>## [1] 10.13043</code></pre>
+<pre><code>## [1] 10.13417</code></pre>
 <pre class="r"><code># resistant LC50
 exp(mean(-post$a[,2]/post$b[,2]))</code></pre>
-<pre><code>## [1] 43.87912</code></pre>
+<pre><code>## [1] 43.87604</code></pre>
 <pre class="r"><code># resistance factor with 95% credible intervals
 x50_diff = exp(-post$a[,2]/post$b[,2] - -post$a[,1]/post$b[,1])
 mean(x50_diff)</code></pre>
-<pre><code>## [1] 4.473239</code></pre>
+<pre><code>## [1] 4.472003</code></pre>
 <pre class="r"><code>HPDI(x50_diff, prob = 0.95)</code></pre>
 <pre><code>##    |0.95    0.95| 
-## 2.413963 6.783303</code></pre>
+## 2.441506 6.813392</code></pre>
 <p>[1] Upon reading a bit more I found out that stan can indeed handle aggregated binomial data. So we could also do this:</p>
 <pre class="r"><code>d_stan = d %&gt;% 
   ungroup %&gt;%

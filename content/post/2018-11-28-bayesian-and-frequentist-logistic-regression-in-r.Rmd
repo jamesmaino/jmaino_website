@@ -33,6 +33,7 @@ d = read_csv('data/DoseResponseMaino2018.csv', col_types = 'ccniii') %>%
   summarise_all(sum) %>%
   mutate(total = dead + alive) %>%
   filter(dose != 0)
+d
   
 ```
 
