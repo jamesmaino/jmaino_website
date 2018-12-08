@@ -1,0 +1,298 @@
+---
+title: Bayesian and frequentist approaches to binomial dose responses in R
+author: James Maino
+date: '2018-11-28'
+slug: bayesian-and-frequentist-logistic-regression-in-r
+categories: []
+tags: ["logistic", "resistance", "population", "exponential", "logistic", "R"]
+header:
+  caption: "Testing resistance to pesticides"
+  image: "20170711_144810.jpg"
+---
+
+
+
+<p>For a given species, a simple mortality response to environmental conditions can represented with the probabilistic outcome (death), which occurs with probabilty <span class="math inline">\(p\)</span>. This simple process is know as a Bernoulli random variable.</p>
+<p>A motivating example is how a pest responds to increasing doses of a pesticide. Invertebrate <a href="https://www.cambridge.org/core/journals/journal-of-agricultural-science/article/crop-losses-to-pests/AD61661AD6D503577B3E73F2787FE7B2">pests cause 10-20% of yield losses</a> in modern food systems. While cultural practices such as crop rotatation and biological control through beneficial insects increasingly form a core component of effective and sustainable management, pesticides remain a widely used tool. The following data set from Maino et al. (<a href="http://www.bioone.org/doi/abs/10.1071/CP17327">2018</a>) shows the mortality response of two populations to the pesticide omethoate.</p>
+<pre class="r"><code>library(tidyverse)
+library(rethinking)
+source(&#39;data/useful_scripts/mydarktheme.R&#39;)
+options(mc.cores = parallel::detectCores() - 1)
+rstan_options(auto_write = TRUE)</code></pre>
+<p>The Bernoulli mortality probability <span class="math inline">\(p\)</span> changes with the set of conditions represented by the design matrix <span class="math inline">\(X\)</span>, where rows are observations and columns are covariates. It is convienient to assume <span class="math inline">\(p\)</span> follows the relationship:</p>
+<p><span class="math display">\[p = \frac{1}{1 + e^{-X\boldsymbol{b}}}\]</span></p>
+<p>where <span class="math inline">\(b\)</span> is a vector of coefficients. In this equation, <span class="math inline">\(p\)</span> is constrained to values between 0 and 1. The <span class="math inline">\(Xb\)</span> component is just a linear equation of the form <span class="math inline">\(b_1x_1 + b_2x_2 + ... +b_nx_n\)</span> which can be solved through rearrangement:</p>
+<p><span class="math display">\[\ln \frac{p}{1 - p} = logit(p) = X\boldsymbol{b}\]</span></p>
+<p>With the logit link function and the linear equation specifying the relationship of binomial parameter <span class="math inline">\(p\)</span> with its covariates, we now have the ingredients for a general linear model. For <span class="math inline">\(X\)</span> we allow a unique intercept and dose slope for each population, which is specified usign the following formula notation.</p>
+<pre class="r"><code>m1 = glm(cbind(dead, alive) ~ pop/log(dose) - 1, family = binomial(&#39;logit&#39;), 
+         data = d )</code></pre>
+<p>We can print the model matrix can be observed using using the <code>model.matrix</code> function.</p>
+<pre class="r"><code>model.matrix(m1)</code></pre>
+<pre><code>##    popcontrol popresistant popcontrol:log(dose) popresistant:log(dose)
+## 1           1            0           -4.9618451              0.0000000
+## 2           1            0           -2.6592600              0.0000000
+## 3           1            0           -0.3566749              0.0000000
+## 4           1            0            1.9459101              0.0000000
+## 5           1            0            4.2484952              0.0000000
+## 6           1            0            6.5510803              0.0000000
+## 7           1            0            8.8536654              0.0000000
+## 8           0            1            0.0000000             -4.9618451
+## 9           0            1            0.0000000             -2.6592600
+## 10          0            1            0.0000000             -0.3566749
+## 11          0            1            0.0000000              1.9459101
+## 12          0            1            0.0000000              4.2484952
+## 13          0            1            0.0000000              6.5510803
+## 14          0            1            0.0000000              8.8536654
+## attr(,&quot;assign&quot;)
+## [1] 1 1 2 2
+## attr(,&quot;contrasts&quot;)
+## attr(,&quot;contrasts&quot;)$pop
+## [1] &quot;contr.treatment&quot;</code></pre>
+<p>The summary output tells us that one population called “resistant” appears to have a higher intercept.</p>
+<pre class="r"><code>summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = cbind(dead, alive) ~ pop/log(dose) - 1, family = binomial(&quot;logit&quot;), 
+##     data = d)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -2.66626  -0.37482  -0.02094   0.29396   2.08559  
+## 
+## Coefficients:
+##                        Estimate Std. Error z value Pr(&gt;|z|)    
+## popcontrol              -3.7440     0.6145  -6.093 1.11e-09 ***
+## popresistant            -5.7053     0.9141  -6.242 4.33e-10 ***
+## popcontrol:log(dose)     1.6188     0.2548   6.354 2.09e-10 ***
+## popresistant:log(dose)   1.5064     0.2253   6.686 2.29e-11 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 817.127  on 14  degrees of freedom
+## Residual deviance:  28.145  on 10  degrees of freedom
+## AIC: 50.208
+## 
+## Number of Fisher Scoring iterations: 7</code></pre>
+<p>This can be confirmed visually by plotting the model with 95% prediction intervals.</p>
+<pre class="r"><code>m1pred = expand.grid(
+  pop = c(&#39;control&#39;,&#39;resistant&#39;),
+  dose = 10^seq(-2, 4, length = 100)
+)
+m1pred$logdose = log(m1pred$dose)
+pred = predict(m1, newdata = m1pred, type = &#39;response&#39; , se.fit = TRUE)
+m1pred$p = pred$fit
+m1pred$se = pred$se.fit
+
+p_freq = ggplot() + 
+  geom_point(data = d, aes(dose, dead/total, colour = pop)) +
+  geom_line(data = m1pred, aes(dose, p, colour = pop)) +
+  geom_ribbon(data = m1pred, 
+              aes(dose, ymin = p - 1.96*se, max = p + 1.96*se, fill = pop), 
+              alpha = 0.5) +
+  mydarktheme +
+  xlab(&#39;omethoate (mg/L)&#39;) +
+  ggtitle(&#39;Frequentist&#39;) +
+  scale_x_log10()
+p_freq</code></pre>
+<p><img src="/post/2018-11-28-bayesian-and-frequentist-logistic-regression-in-r_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>We can also rearrange the data into a Bernoulli format (each row is an individual trial) using the following<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+<pre class="r"><code>db = d %&gt;%
+  rowwise() %&gt;%
+  mutate(outcome = list(rep(c(0, 1), c(alive, dead)))) %&gt;%
+  dplyr::select(-alive,-dead, -total) %&gt;%
+  unnest()
+head(db)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##   treatment pop      dose outcome
+##   &lt;chr&gt;     &lt;chr&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1 omethoate control 0.007       0
+## 2 omethoate control 0.007       0
+## 3 omethoate control 0.007       0
+## 4 omethoate control 0.007       0
+## 5 omethoate control 0.007       0
+## 6 omethoate control 0.007       0</code></pre>
+<p>The model coefficients are the same despite our trial size changing to n = 1.</p>
+<pre class="r"><code>m1 = glm(outcome ~ pop/log(dose) - 1, family = binomial(&#39;logit&#39;), 
+         data = db )
+summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = outcome ~ pop/log(dose) - 1, family = binomial(&quot;logit&quot;), 
+##     data = db)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -2.89083  -0.06234  -0.00392   0.04577   2.94434  
+## 
+## Coefficients:
+##                        Estimate Std. Error z value Pr(&gt;|z|)    
+## popcontrol              -3.7440     0.6145  -6.093 1.11e-09 ***
+## popresistant            -5.7053     0.9141  -6.242 4.33e-10 ***
+## popcontrol:log(dose)     1.6188     0.2547   6.355 2.09e-10 ***
+## popresistant:log(dose)   1.5064     0.2253   6.686 2.29e-11 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 970.41  on 700  degrees of freedom
+## Residual deviance: 181.42  on 696  degrees of freedom
+## AIC: 189.42
+## 
+## Number of Fisher Scoring iterations: 8</code></pre>
+<p>Now lets try fitting the same model using a Bayesian approach. I am using the <code>rethinking</code> package by Richard McElreath, whose book <strong>Statistical Rethinking</strong> I highly recommend. From the plots below, the fits are nearly indistinguishable.</p>
+<pre class="r"><code>db_stan = db %&gt;%
+  mutate(
+    logdose = log(dose),
+    pop = ifelse(pop == &#39;control&#39;, 1, 2)) %&gt;%
+  as.data.frame
+
+m2 &lt;- rethinking::map(
+  alist(
+    outcome ~ dbinom( 1 , p ) ,
+    logit(p) &lt;- a[pop] + b[pop]*logdose ,
+    a[pop]  ~ dnorm(0, 10),
+    b[pop]  ~ dnorm(0, 10)
+  ),
+  data = db_stan, start = list(a = c(-3, -5), b = c(1.4, 1.6)) #, chains=2 , iter=2500 , warmup=500 
+)
+precis(m2, depth = 2)</code></pre>
+<pre><code>##       Mean StdDev  5.5% 94.5%
+## a[1] -3.73   0.61 -4.70 -2.75
+## a[2] -5.66   0.90 -7.09 -4.22
+## b[1]  1.61   0.25  1.21  2.02
+## b[2]  1.49   0.22  1.14  1.85</code></pre>
+<pre class="r"><code>m2pred = expand.grid(
+  pop = 1:2,
+  logdose = log(10^seq(-2, 4, length = 100))
+)
+mu &lt;- link( m2 , data=m2pred)</code></pre>
+<pre><code>## [ 100 / 1000 ]
+[ 200 / 1000 ]
+[ 300 / 1000 ]
+[ 400 / 1000 ]
+[ 500 / 1000 ]
+[ 600 / 1000 ]
+[ 700 / 1000 ]
+[ 800 / 1000 ]
+[ 900 / 1000 ]
+[ 1000 / 1000 ]</code></pre>
+<pre class="r"><code>m2pred$mu.mean &lt;- apply( mu , 2 , mean )
+m2pred[,c(&#39;PIL&#39;, &#39;PIH&#39;)] &lt;- t(apply( mu , 2 , PI , prob = 0.95))
+m2pred$pop = ifelse(m2pred$pop == 1, &#39;control&#39;, &#39;resistant&#39;)
+
+p_bayes = ggplot(m2pred, aes(x = exp(logdose))) + 
+  geom_line(aes(y = mu.mean, colour = pop)) +
+  geom_ribbon(aes(ymin = PIL, ymax = PIH , fill = pop), alpha = 0.5) + 
+  geom_point(data = d, aes(dose, dead/total, colour = pop)) +
+  scale_x_log10() + 
+  ylab(&#39;dead/total&#39;) + 
+  xlab(&#39;omethoate (mg/L)&#39;) + 
+  ggtitle(&#39;Bayesian&#39;) +
+  mydarktheme</code></pre>
+<pre class="r"><code>cowplot::plot_grid(p_freq, p_bayes, ncol = 2)</code></pre>
+<p><img src="/post/2018-11-28-bayesian-and-frequentist-logistic-regression-in-r_files/figure-html/unnamed-chunk-10-1.png" width="864" /></p>
+<p>The dose at which some proportion of mortality occurs (e.g. 50%) has classically been a common summary statistic as it can be convienient to talk about mortality in terms of doses rather than model coefficients. This can be computed algebraically from the regression equation for each population as <span class="math inline">\(logit(y) = a + b x_{dose}\)</span>, which can be solved as <span class="math inline">\(x_{dose} = (log(\frac{y}{1-y}) - a)/b\)</span>. The lethal dose required for 50% mortality occurs when <span class="math inline">\(y = 0.5\)</span> or <span class="math inline">\(x_{LD50} = -a/b\)</span>.</p>
+<pre class="r"><code>-coef(m1)[1]/coef(m1)[2]</code></pre>
+<pre><code>## popcontrol 
+## -0.6562276</code></pre>
+<p>This is a compound parameter of two model parameters that each have their own variance and co-variance and it possible to <a href="https://cran.r-project.org/web/packages/modmarg/vignettes/delta-method.html">estimate the distribution of this quantity analytically</a>, but not straightforward (at least not for me). The delta method can be used to estimate variance of <span class="math inline">\(x_{LD50}\)</span> by assuming the quantity is multivariate normally distributed. The <code>dose.p</code> function in the <code>MASS</code> package can do this for us using the following code.</p>
+<pre class="r"><code>library(MASS)
+# we can simply run dose.p(m1, cf = c(1,3) or more verbosely
+cf = c(1, 3) # The terms in the coefficient vector giving the intercept and coefficient of (log-)dose
+p = 0.5 # Probabilities at which to predict the dose needed.
+eta &lt;- family(m1)$linkfun(p)
+b &lt;- coef(m1)[cf]
+x.p &lt;- (eta - b[1L])/b[2L]
+names(x.p) &lt;- paste(&quot;p = &quot;, format(p), &quot;:&quot;, sep = &quot;&quot;)
+pd &lt;-  -cbind(1, x.p)/b[2L]
+SE &lt;- sqrt(((pd %*% vcov(m1)[cf, cf]) * pd) %*% c(1, 1))
+
+# LD50
+exp(c(x.p - 1.96 * SE, x.p + 1.96 * SE))</code></pre>
+<pre><code>## [1]  7.294287 13.992988</code></pre>
+<p>I find the solution to this problem using the Bayesian framework more intuitive. The covariance structure of the model paramaters is captured in the posterior distribution, so we can sample model parameters from the posterior distribution and then do some algebra solving for <span class="math inline">\(x_{LD50}\)</span> as before and plot for the control population</p>
+<pre class="r"><code>post = extract.samples(m2, n = 1e5)
+logx50 = -post$a[,1]/post$b[,1]
+exp(mean(logx50))</code></pre>
+<pre><code>## [1] 10.13043</code></pre>
+<pre class="r"><code>exp(HPDI(logx50, prob = 0.95))</code></pre>
+<pre><code>##     |0.95     0.95| 
+##  7.184564 14.259132</code></pre>
+<p>In general, solving for the distribution of arbitrary compound parameters is much more straightforward in a Bayesian context.</p>
+<p>But perhaps the most compelling case for a Bayesian approach with dose responses is when it comes to estimating whether or not the LC50s of both populations are different (and then how different the responses are expressed as a resistance factor). The implications of the covariance structure between the four model paramaters hurts my poor brain. You see many papers getting around this issue by somewhat informally inspecting the overlap of confidence intervals, which is likely to be overconservative. The resistance factor is usaully provided as the ratio of the LC50 values, which usually lacks a confidence interval.</p>
+<pre class="r"><code># LC50 using maximum liklihood
+# control
+con = dose.p(m1, c(1, 3), p = 0.5)
+exp(con)</code></pre>
+<pre><code>##              Dose      SE
+## p = 0.5: 10.10291 0.16619</code></pre>
+<pre class="r"><code>exp(c(con - 1.96 * attr(con, &#39;SE&#39;), con + 1.96 * attr(con, &#39;SE&#39;)))</code></pre>
+<pre><code>## [1]  7.294287 13.992988</code></pre>
+<pre class="r"><code># resistant
+res = dose.p(m1, c(2, 4), p = 0.5)
+res</code></pre>
+<pre><code>##              Dose        SE
+## p = 0.5: 3.787473 0.1785665</code></pre>
+<pre class="r"><code>exp(c(res - 1.96 * attr(con, &#39;SE&#39;), res + 1.96 * attr(con, &#39;SE&#39;)))</code></pre>
+<pre><code>## [1] 31.87240 61.14238</code></pre>
+<pre class="r"><code># resistance factor
+exp(res[1])/exp(con[1])</code></pre>
+<pre><code>## p = 0.5: 
+## 4.369501</code></pre>
+<p>I personally circumvent the issue by performing a log-liklihood ratio test on the full model with simplified models that assume universal slope, or intercept parameters, but this approach is a little less direct than ideal.</p>
+<pre class="r"><code>m1_full = glm(cbind(dead, alive) ~ pop*log(dose), family = binomial(&#39;logit&#39;), 
+         data = d )
+m1_no_pop = glm(cbind(dead, alive) ~ log(dose), family = binomial(&#39;logit&#39;), 
+         data = d )
+anova(m1_full, m1_no_pop, test = &#39;LRT&#39;)</code></pre>
+<pre><code>## Analysis of Deviance Table
+## 
+## Model 1: cbind(dead, alive) ~ pop * log(dose)
+## Model 2: cbind(dead, alive) ~ log(dose)
+##   Resid. Df Resid. Dev Df Deviance  Pr(&gt;Chi)    
+## 1        10     28.145                          
+## 2        12     59.612 -2  -31.468 1.469e-07 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>But the issue of confidence bounds around the resistance factor remains.</p>
+<p>Sampling from our posterior distribution makes this all look like a walk in the park.</p>
+<pre class="r"><code># control LC50
+exp(mean(-post$a[,1]/post$b[,1]))</code></pre>
+<pre><code>## [1] 10.13043</code></pre>
+<pre class="r"><code># resistant LC50
+exp(mean(-post$a[,2]/post$b[,2]))</code></pre>
+<pre><code>## [1] 43.87912</code></pre>
+<pre class="r"><code># resistance factor with 95% credible intervals
+x50_diff = exp(-post$a[,2]/post$b[,2] - -post$a[,1]/post$b[,1])
+mean(x50_diff)</code></pre>
+<pre><code>## [1] 4.473239</code></pre>
+<pre class="r"><code>HPDI(x50_diff, prob = 0.95)</code></pre>
+<pre><code>##    |0.95    0.95| 
+## 2.413963 6.783303</code></pre>
+<p>[1] Upon reading a bit more I found out that stan can indeed handle aggregated binomial data. So we could also do this:</p>
+<pre class="r"><code>d_stan = d %&gt;% 
+  ungroup %&gt;%
+  mutate(
+    pop = if_else(pop == &#39;control&#39;, 1, 2),
+    logdose = log(dose)
+  ) %&gt;%
+  as.data.frame
+m2.1 &lt;- rethinking::map(
+  alist(
+    dead ~ dbinom(total, p ) ,
+    logit(p) &lt;- a[pop] + b[pop]*logdose ,
+    a[pop]  ~ dnorm(0, 10),
+    b[pop]  ~ dnorm(0, 10)
+  ),
+  data = d_stan, start = list(a = c(-3, -5), b = c(1.4, 1.6)) 
+  #, chains=2 , iter=2500 , warmup=500 
+)</code></pre>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>1<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
