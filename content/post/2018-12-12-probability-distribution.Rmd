@@ -27,12 +27,12 @@ library(tidyverse)
 source('data/useful_scripts/mydarktheme.R')
 ```
 
-How many probability distributions we can generate by imagining simple natural processes? In this post I use a simple binomial random number generator to produce different random variables with a variety of distributions. Using built in probability densities functions in R, I show how the simulated data (plot bars) approach the exact density (plot lines) and provide an intuitive interpretation of model parameters of commonly encountered distributions. 
+How many probability distributions can we generate by imagining simple natural processes? In this post I use a simple binomial random number generator to produce different random variables with a variety of distributions. Using built in probability densities functions in R, I show how the simulated data (plot bars) approach the exact probability density (plot lines) and provide an intuitive interpretation of model parameters of commonly encountered distributions. 
 
 ## A biological example  
-"Nothing in Biology Makes Sense Except in the Light of Evolution"  - Theodosius Dobzhansky, 1973
+*"Nothing in Biology Makes Sense Except in the Light of Evolution"  - Theodosius Dobzhansky, 1973*
 
-Nucleotides form the molecular basis of the genetic code, the order of which is approximately random (to the human eye). In the following, we will imagine reading a strand of random DNA.
+Nucleotides form the molecular basis of the genetic code, the order of which is approximately random (to the human eye). In the following, we will imagine reading a strand of DNA.
 
 The number of A's (Adenine) in one letter of genetic code can be 1 (if A) or 0 (if G, G or T). This is a random Bernoulli variable where $p = 1/4$ and a special case of a Binomial distribution where $n = 1$
 
@@ -70,10 +70,12 @@ p2 = ggplot()+
 p2
 ```
 
-Counting the number of non-A letters until the see the first A gives us a geometric distribution with $p = 1/4$.
+Counting the number of non-A letters until we see the first A gives us a geometric distribution with $p = 1/4$.
 
 ```{r}
-samples = replicate(n = 10000, which(rbinom(n = 10, size = 1, prob = 0.25) == 1)[1] - 1)
+samples = replicate(n = 10000, 
+            which(rbinom(n = 10, size = 1, prob = 0.25) == 1)[1] - 1
+          )
 
 p3 = ggplot()+ 
   geom_histogram(aes(samples), breaks = 0:11 - 0.5, colour = 'black', closed = 'left') + 
@@ -91,7 +93,9 @@ p3
 If we instead count the number of non-A's until we see 2 A's we get a negative binomial distribution with $n = 2$ and $p = 1/4$.
 
 ```{r, warning=F}
-samples = replicate(n = 10000, which(cumsum(rbinom(n = 20, size = 1, prob = 0.25)) == 2)[1] - 2)
+samples = replicate(n = 10000, 
+            which(cumsum(rbinom(n = 20, size = 1, prob = 0.25)) == 2)[1] - 2
+          )
 
 p4 = ggplot()+ 
   geom_histogram(aes(samples), breaks = 0:11 - 0.5, colour = 'black', closed = 'left') + 
@@ -105,39 +109,42 @@ p4 = ggplot()+
 p4
 ```
 
-A codon consists of three nucleotides and codes for an amino acid. The amino acid Tryptophan is coded by TGG, which is one of $4^3 = 64$ codons. 
+A codon consists of three nucleotides and codes for an amino acid. The amino acid tryptophan is coded by TGG, which is one of $4^3 = 64$ codons. 
 
-Counting the number of Tryptophan codons in 1000 codons can be represented as a binomial trial with $n = 1000$ and $p = (1/4)^3$
+Counting the number of Tryptophan codons in 1000 codons can be represented as a Poisson distribution with $\gamma = np = 1000 \times (1/4)^3 $ 
 
 
 ```{r}
-samples = replicate(n = 10000, sum(rbinom(n = 1000, size = 3, prob = 0.25) == 3))
+samples = replicate(n = 10000, 
+            sum(rbinom(n = 1000, size = 3, prob = 0.25) == 3)
+          )
 
 x= 1:50
 p5 = ggplot()+ 
   geom_histogram(aes(samples), breaks = x - 0.5, colour = 'black', closed = 'left') + 
-  geom_line( aes(x , dpois( x, 1000 *(1/4)^3) * 10000), col = "red") +
+  geom_line( aes(x , dpois(x, 1000 *(1/4)^3) * 10000), col = "red") +
 
   # aesthetics
-  ggtitle('Big binomial distribution') +
+  ggtitle('Poisson distribution') +
   xlab('number of tryptophan (TGG) in 1000 codons') +
   mydarktheme
 
 p5
 ```
 
-However, this distribution is also approximated by a Poisson distibution with $\gamma = np = 1000 (1/4)^3 $ (shown as green dots).
+However, this distribution is also approximated by a binomial trial with $n = 1000$ and $p = (1/4)^3$ (shown as green dots).
 
 ```{r}
-p5 + geom_point(aes(x, dbinom(x, 1000, (1/4)^3) * 10000), col = "green") 
+p5 + geom_point(aes(x, dbinom(x, 1000, (1/4)^3) * 10000), col = "green") + 
+  ggtitle('Poisson and Binomial distribution')
 
 ```
 
-The approximation improves as $n \to \infty$ and $p \to 0$. For example, a Poisson distribution would be a poor approximation in the first example of counting A's in a single random DNA letter. We cannot have more than one A in a single letter as Poisson predicts!
+The approximation improves as $n \to \infty$ and $p \to 0$. For example, a Poisson distribution would be a poor approximation in the first example of counting A's in a single random DNA letter (as shown by the green line below). We cannot have more than one A in a single letter as Poisson predicts!
 
 ```{r}
 
-p1 + geom_point(aes(0:5 , dpois(0:5, 1 * 1/2) * 10000), col = "green")
+p1 + geom_line(aes(0:5 , dpois(0:5, 1 * 1/2) * 10000), col = "green")
 
 ```
 
@@ -149,7 +156,9 @@ If it takes a gene sequencer 1 millisecond to read a codon (as above), it will t
 The time until the first tryptophan read is exponentially distributed.
 
 ```{r}
-samples = replicate(n = 10000, which(rbinom(n = 1000, size = 3, prob = 0.25) ==3)[1] )/1000
+samples = replicate(n = 10000, 
+            which(rbinom(n = 1000, size = 3, prob = 0.25) ==3)[1] 
+          )/1000
 
 bins = 100
 x = seq(0, 1, length = bins)
@@ -165,10 +174,13 @@ p6 = ggplot()+
 p6
 ```
 
-The time it takes to for three trytophan reads is gamma distributed with $r = 3$.
+The time it takes to for three tryptophan reads is gamma distributed with $r = 3$.
 
 ```{r}
-samples1 = replicate(n = 10000, which(rbinom(n = 1000, size = 3, prob = 0.25) == 3)[1] )/1000
+samples1 = replicate(n = 10000, 
+            which(rbinom(n = 1000, size = 3, prob = 0.25) == 3)[1] 
+           )/1000
+
 samples2 = sample(samples1)
 samples3 = sample(samples1)
 
@@ -189,16 +201,16 @@ p6
 ```
 
 
-Suppose we add more and more random of these random variables together. What we find is that the distibution approaches the famous normal distribution. Indeed, normal distributions are so ubiquitous in nature precisely because they arise as the resulting of adding random variables. 
+Suppose we add more and more random of these random exponential variables together. What we find is that the distribution approaches the famous normal distribution. Indeed, normal distributions are so ubiquitous in nature precisely because they arise from the sumation of random variables. 
 
-Note that below I truncate the search for tryptophans at 500 ms otherwise it takes a while to simulate the random variable using `rbinom`. In addition, `r` should be much larger than 32 for the simulated data to better approach the normal distribution.
+Note that below is the first example where I have have had to replace my poor little `rbinom` based exponential sampler with `rexp` as it just became too slow.
 
 ```{r}
-r = 32
+r = 1000 # number of exp distributions to add
 gamma = 16
-nsamples = replicate(n = 10000 * r, which(rbinom(n = 500, size = 3, prob = 0.25) == 3)[1] )/1000
+
+nsamples = rexp(10000 * r, 16)
 samples = apply(array(nsamples, dim = c(10000, r)), 1, sum)
-sum(is.na(samples))/length(samples) # check that not too many trials were truncated
 
 # normal distribution parameters
 mu = r / gamma 
@@ -218,7 +230,7 @@ p7 =ggplot()+
 p7
 ```
 
-It's  nice to think about how simple processes can generate such a variety of probability distribution functions. A great graphic was produced by by Ehsan azhdari showing the relationships between probability distributions. 
+It's  nice to think about how simple processes can generate such a variety of probability distribution functions. A great graphic was produced by Ehsan azhdari showing the relationships between probability distributions. 
 
 ![Relationships among some of univariate probability distributions are illustrated with connected lines. dashed lines means approximate relationship, CC BY-SA 3.0 CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=22628518](https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Relationships_among_some_of_univariate_probability_distributions.jpg/1920px-Relationships_among_some_of_univariate_probability_distributions.jpg)
 
