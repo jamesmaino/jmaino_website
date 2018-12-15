@@ -1,0 +1,170 @@
+---
+title: Generating probability distributions with natural examples
+author: James Maino
+date: '2018-12-12'
+slug: generating-probability-distribution-with-natural-examples
+categories: []
+tags: ["probability", "statistics", "mechanistic", "R"]
+header:
+  caption: 'Building distributions with a coin flip'
+  image: 'Poisson_banner.png'
+---
+
+
+
+<p>How many probability distributions we can generate by imagining simple natural processes? In this post I use a simple binomial random number generator to produce different random variables with a variety of distributions. Using built in probability densities functions in R, I show how the simulated data (plot bars) approach the exact density (plot lines) and provide an intuitive interpretation of model parameters of commonly encountered distributions.</p>
+<div id="a-biological-example" class="section level2">
+<h2>A biological example</h2>
+<p>“Nothing in Biology Makes Sense Except in the Light of Evolution” - Theodosius Dobzhansky, 1973</p>
+<p>Nucleotides form the molecular basis of the genetic code, the order of which is approximately random (to the human eye). In the following, we will imagine reading a strand of random DNA.</p>
+<p>The number of A’s (Adenine) in one letter of genetic code can be 1 (if A) or 0 (if G, G or T). This is a random Bernoulli variable where <span class="math inline">\(p = 1/4\)</span> and a special case of a Binomial distribution where <span class="math inline">\(n = 1\)</span></p>
+<pre class="r"><code>samples1 = rbinom(n = 10000, size = 1, prob = 1/4)
+
+p1 = ggplot()+ 
+  geom_histogram(aes(samples1), breaks = 0:2 - 0.5, colour = &#39;black&#39;, closed = &#39;left&#39;) + 
+  geom_line(aes(0:1, dbinom(0:1, 1, 0.25) * 10000), col = &quot;red&quot;) +
+  
+  # aesthetics
+  ggtitle(&#39;Bernoulli distribution&#39;) +
+  xlab(&#39;number of A bases per nucleotide&#39;) +
+  ylab(&#39;counts per 10000 nucleotides&#39;) +
+  mydarktheme
+
+p1</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>If we count the A’s in 10 letters of code, This random variable becomes binomial with <span class="math inline">\(n = 10\)</span> and <span class="math inline">\(p = 1/4\)</span>.</p>
+<pre class="r"><code>samples = rbinom(n = 10000, size = 10, prob = 0.25)
+
+p2 = ggplot()+ 
+  geom_histogram(aes(samples), breaks = 0:10 -  0.5, colour = &#39;black&#39;, closed = &#39;left&#39;) + 
+  geom_line(aes(0:10, dbinom(0:10, 10, 0.25) * 10000), col = &quot;red&quot;) +
+  
+  # aesthetics
+  ggtitle(&#39;Binomial distribution&#39;) +
+  xlab(&#39;number of A bases in 10 nucleotides&#39;) +
+  mydarktheme + 
+  scale_x_continuous(breaks = 0:10)
+
+p2</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Counting the number of non-A letters until the see the first A gives us a geometric distribution with <span class="math inline">\(p = 1/4\)</span>.</p>
+<pre class="r"><code>samples = replicate(n = 10000, which(rbinom(n = 10, size = 1, prob = 0.25) == 1)[1] - 1)
+
+p3 = ggplot()+ 
+  geom_histogram(aes(samples), breaks = 0:11 - 0.5, colour = &#39;black&#39;, closed = &#39;left&#39;) + 
+  geom_line(aes(0:10,  dgeom(0:10, 0.25) * 10000), col = &quot;red&quot;) +
+  
+  # aesthetics
+  ggtitle(&#39;Geometric distribution&#39;) +
+  xlab(&#39;number of nucleotides until first A base&#39;) +
+  mydarktheme 
+
+p3</code></pre>
+<pre><code>## Warning: Removed 548 rows containing non-finite values (stat_bin).</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>If we instead count the number of non-A’s until we see 2 A’s we get a negative binomial distribution with <span class="math inline">\(n = 2\)</span> and <span class="math inline">\(p = 1/4\)</span>.</p>
+<pre class="r"><code>samples = replicate(n = 10000, which(cumsum(rbinom(n = 20, size = 1, prob = 0.25)) == 2)[1] - 2)
+
+p4 = ggplot()+ 
+  geom_histogram(aes(samples), breaks = 0:11 - 0.5, colour = &#39;black&#39;, closed = &#39;left&#39;) + 
+  geom_line(aes(0:10,  dnbinom(0:10, 2, 0.25) * 10000), col = &quot;red&quot;) +
+  
+  # aesthetics
+  ggtitle(&#39;Negative binomial distribution&#39;) +
+  xlab(&quot;number of non-A nucleotides until two A&#39;s&quot;) +
+  mydarktheme 
+
+p4</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>A codon consists of three nucleotides and codes for an amino acid. The amino acid Tryptophan is coded by TGG, which is one of <span class="math inline">\(4^3 = 64\)</span> codons.</p>
+<p>Counting the number of Tryptophan codons in 1000 codons can be represented as a binomial trial with <span class="math inline">\(n = 1000\)</span> and <span class="math inline">\(p = (1/4)^3\)</span></p>
+<pre class="r"><code>samples = replicate(n = 10000, sum(rbinom(n = 1000, size = 3, prob = 0.25) == 3))
+
+x= 1:50
+p5 = ggplot()+ 
+  geom_histogram(aes(samples), breaks = x - 0.5, colour = &#39;black&#39;, closed = &#39;left&#39;) + 
+  geom_line( aes(x , dpois( x, 1000 *(1/4)^3) * 10000), col = &quot;red&quot;) +
+
+  # aesthetics
+  ggtitle(&#39;Big binomial distribution&#39;) +
+  xlab(&#39;number of tryptophan (TGG) in 1000 codons&#39;) +
+  mydarktheme
+
+p5</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>However, this distribution is also approximated by a Poisson distibution with $= np = 1000 (1/4)^3 $ (shown as green dots).</p>
+<pre class="r"><code>p5 + geom_point(aes(x, dbinom(x, 1000, (1/4)^3) * 10000), col = &quot;green&quot;) </code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>The approximation improves as <span class="math inline">\(n \to \infty\)</span> and <span class="math inline">\(p \to 0\)</span>. For example, a Poisson distribution would be a poor approximation in the first example of counting A’s in a single random DNA letter. We cannot have more than one A in a single letter as Poisson predicts!</p>
+<pre class="r"><code>p1 + geom_point(aes(0:5 , dpois(0:5, 1 * 1/2) * 10000), col = &quot;green&quot;)</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>We now extend this story to continuous distributions - where the outcome is not an integer.</p>
+<p>If it takes a gene sequencer 1 millisecond to read a codon (as above), it will take us 1 second to read 1000 codons. Remember the Poisson rate of tryptophan per 1000 codons was <span class="math inline">\(np = 1000 \times (1/4)^3 \approx 16\)</span> or in other words 1/16 seconds until a tryptophan was read.</p>
+<p>The time until the first tryptophan read is exponentially distributed.</p>
+<pre class="r"><code>samples = replicate(n = 10000, which(rbinom(n = 1000, size = 3, prob = 0.25) ==3)[1] )/1000
+
+bins = 100
+x = seq(0, 1, length = bins)
+p6 = ggplot()+ 
+  geom_histogram(aes(samples), breaks = x, colour = &#39;black&#39;, closed = &#39;left&#39;) + 
+  geom_line(aes(x,  dexp(x, 16) * 10000/bins), col = &quot;red&quot;) +
+  
+  # aesthetics
+  ggtitle(&#39;Exponential distribution&#39;) +
+  xlab(&#39;time until first trytophan (TGG), milliseconds&#39;) +
+  mydarktheme 
+
+p6</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>The time it takes to for three trytophan reads is gamma distributed with <span class="math inline">\(r = 3\)</span>.</p>
+<pre class="r"><code>samples1 = replicate(n = 10000, which(rbinom(n = 1000, size = 3, prob = 0.25) == 3)[1] )/1000
+samples2 = sample(samples1)
+samples3 = sample(samples1)
+
+samples  = samples1 + samples2 + samples3
+
+bins = 100
+x = seq(0, 1, length = bins)
+p6 = ggplot()+ 
+  geom_histogram(aes(samples), breaks = x, colour = &#39;black&#39;, closed = &#39;left&#39;) + 
+  geom_line(aes(x,  dgamma(x, shape = 3, rate = 16) * 10000/bins), col = &quot;red&quot;) +
+  
+  # aesthetics
+  ggtitle(&#39;Gamma distribution&#39;) +
+  xlab(&#39;time until three trytophans (TGG), milliseconds&#39;) +
+  mydarktheme 
+
+p6</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Suppose we add more and more random of these random variables together. What we find is that the distibution approaches the famous normal distribution. Indeed, normal distributions are so ubiquitous in nature precisely because they arise as the resulting of adding random variables.</p>
+<p>Note that below I truncate the search for tryptophans at 500 ms otherwise it takes a while to simulate the random variable using <code>rbinom</code>. In addition, <code>r</code> should be much larger than 32 for the simulated data to better approach the normal distribution.</p>
+<pre class="r"><code>r = 32
+gamma = 16
+nsamples = replicate(n = 10000 * r, which(rbinom(n = 500, size = 3, prob = 0.25) == 3)[1] )/1000
+samples = apply(array(nsamples, dim = c(10000, r)), 1, sum)
+sum(is.na(samples))/length(samples) # check that not too many trials were truncated</code></pre>
+<pre><code>## [1] 0.0153</code></pre>
+<pre class="r"><code># normal distribution parameters
+mu = r / gamma 
+std = sqrt(r * (1/gamma)^2)
+
+bins = 50
+x = seq(mu - 3 * std, mu + 3 * std, length = bins)
+p7 =ggplot()+ 
+  geom_histogram(aes(samples), breaks = x, colour = &#39;black&#39;, closed = &#39;left&#39;) + 
+  geom_line(aes(x,  dnorm(x, mean = mu, sd = std) * 10000 * (x[2] - x[1])), col = &quot;red&quot;) +
+  
+  # aesthetics
+  ggtitle(&#39;Normal distribution&#39;) +
+  xlab(paste(&#39;time until&#39;,r ,&#39;trytophans (TGG), seconds&#39;)) +
+  mydarktheme 
+
+p7</code></pre>
+<pre><code>## Warning: Removed 153 rows containing non-finite values (stat_bin).</code></pre>
+<p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>It’s nice to think about how simple processes can generate such a variety of probability distribution functions. A great graphic was produced by by Ehsan azhdari showing the relationships between probability distributions.</p>
+<div class="figure">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Relationships_among_some_of_univariate_probability_distributions.jpg/1920px-Relationships_among_some_of_univariate_probability_distributions.jpg" alt="Relationships among some of univariate probability distributions are illustrated with connected lines. dashed lines means approximate relationship, CC BY-SA 3.0 CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=22628518" />
+<p class="caption">Relationships among some of univariate probability distributions are illustrated with connected lines. dashed lines means approximate relationship, CC BY-SA 3.0 CC BY-SA 3.0, <a href="https://commons.wikimedia.org/w/index.php?curid=22628518" class="uri">https://commons.wikimedia.org/w/index.php?curid=22628518</a></p>
+</div>
+</div>
