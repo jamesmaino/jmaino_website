@@ -16,7 +16,7 @@ relativeURLs = true
 paginate = 10
 
 # Enable comments by entering your Disqus shortname
-disqusShortname = ""
+disqusShortname = "jamesmaino"
 
 # Enable analytics by entering your Google Analytics tracking ID
 googleAnalytics = "UA-110459317-1"

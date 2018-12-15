@@ -62,7 +62,7 @@ p3 = ggplot()+
   mydarktheme 
 
 p3</code></pre>
-<pre><code>## Warning: Removed 592 rows containing non-finite values (stat_bin).</code></pre>
+<pre><code>## Warning: Removed 573 rows containing non-finite values (stat_bin).</code></pre>
 <p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>If we instead count the number of non-A’s until we see 2 A’s we get a negative binomial distribution with <span class="math inline">\(n = 2\)</span> and <span class="math inline">\(p = 1/4\)</span>.</p>
 <pre class="r"><code>samples = replicate(n = 10000, 
@@ -148,7 +148,7 @@ p6 = ggplot()+
 
 p6</code></pre>
 <p><img src="/post/2018-12-12-probability-distribution_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
-<p>Suppose we add more and more random of these random exponential variables together. What we find is that the distribution approaches the famous normal distribution. Indeed, normal distributions are so ubiquitous in nature precisely because they arise from the sumation of random variables.</p>
+<p>Suppose we add more and more of these random exponential variables together. What we find is that the distribution approaches the famous normal distribution. Indeed, normal distributions are so ubiquitous in nature precisely because they arise from the sumation of random variables.</p>
 <p>Note that below is the first example where I have have had to replace my poor little <code>rbinom</code> based exponential sampler with <code>rexp</code> as it just became too slow.</p>
 <pre class="r"><code>r = 1000 # number of exp distributions to add
 gamma = 16
@@ -178,4 +178,28 @@ p7</code></pre>
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Relationships_among_some_of_univariate_probability_distributions.jpg/1920px-Relationships_among_some_of_univariate_probability_distributions.jpg" alt="Relationships among some of univariate probability distributions are illustrated with connected lines. dashed lines means approximate relationship, CC BY-SA 3.0 CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=22628518" />
 <p class="caption">Relationships among some of univariate probability distributions are illustrated with connected lines. dashed lines means approximate relationship, CC BY-SA 3.0 CC BY-SA 3.0, <a href="https://commons.wikimedia.org/w/index.php?curid=22628518" class="uri">https://commons.wikimedia.org/w/index.php?curid=22628518</a></p>
 </div>
+<div id="disqus_thread">
+
+</div>
+<script>
+
+/**
+*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+/*
+var disqus_config = function () {
+this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+};
+*/
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://jamesmaino.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>
+Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
 </div>
