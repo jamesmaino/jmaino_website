@@ -1,0 +1,223 @@
+---
+title: Accessing SILO climatic data for Australia in R
+author: James Maino
+date: '2018-12-31'
+slug: accessing-silo-climatic-data-for-australia-in-r
+categories: []
+tags: ["climate", "ecology", "database", "R"]
+header:
+  caption: "SILO data in R"
+  image: "MEL2018_temp_rain.png"
+---
+
+
+
+<p>This short post will describe how to access SILO climatic data for Australia. The data is available as both csv and json, but here we work with the two-dimensional csv format to make use of R’s powerful data table functionality.</p>
+<p>At the time of writing there were 18937 stations. We can access the metadata on each station (including location and years of available data), which will later become useful for selecting an appropriate weather station.</p>
+<pre class="r"><code>library(tidyverse)
+library(sf)
+library(tmap)</code></pre>
+<pre class="r"><code>res &lt;- httr::GET(&quot;https://siloapi.longpaddock.qld.gov.au/stations?format=csv&quot;)
+recs &lt;- read_csv(httr::content(res, as=&quot;text&quot;))
+stationsmeta = recs %&gt;% 
+  st_as_sf(coords = c(&#39;longitude&#39;, &#39;latitude&#39;), crs = 4326)</code></pre>
+<p>We can plot the location of weather stations using the <code>tmap</code> package.</p>
+<pre class="r"><code>tm_shape(spData::world %&gt;% filter(name_long == &quot;Australia&quot;)) +
+  tm_borders() +
+  tm_shape(stationsmeta) +
+  tm_dots(col = NA, alpha = 0.3) +
+  tm_style(&#39;gray&#39;, title = &quot;SILO weather \nstations&quot;, 
+            outer.bg.color = rgb(.2,.21,.27))</code></pre>
+<p><img src="/post/2018-12-31-accessing-silo-climatic-data-for-australia-in-r_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Most stations have between 5 and 10 years of data.</p>
+<pre class="r"><code>ggplot(stationsmeta) + 
+  geom_histogram(aes(x = ifelse(is.na(end_year), 2018, end_year) - start_year), 
+           breaks = seq(0, 200, by = 5)) +
+  xlab(&#39;years of data&#39;) +
+  mydarktheme</code></pre>
+<p><img src="/post/2018-12-31-accessing-silo-climatic-data-for-australia-in-r_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Useful metadata can be accessed, such as the names of climatic variables and their units.</p>
+<pre class="r"><code># variable metadata
+silometa = read_csv(&#39;https://siloapi.longpaddock.qld.gov.au/variables?format=csv&#39;, col_types = &#39;ccc&#39;)
+knitr::kable(silometa)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="left">code</th>
+<th align="left">units</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Daily rainfall</td>
+<td align="left">daily_rain</td>
+<td align="left">mm</td>
+</tr>
+<tr class="even">
+<td align="left">Monthly rainfall</td>
+<td align="left">monthly_rain</td>
+<td align="left">mm</td>
+</tr>
+<tr class="odd">
+<td align="left">Maximum temperature</td>
+<td align="left">max_temp</td>
+<td align="left">Celsius</td>
+</tr>
+<tr class="even">
+<td align="left">Minimum temperature</td>
+<td align="left">min_temp</td>
+<td align="left">Celsius</td>
+</tr>
+<tr class="odd">
+<td align="left">Vapour pressure</td>
+<td align="left">vp</td>
+<td align="left">hPa</td>
+</tr>
+<tr class="even">
+<td align="left">Vapour pressure deficit</td>
+<td align="left">vp_deficit</td>
+<td align="left">hPa</td>
+</tr>
+<tr class="odd">
+<td align="left">Evaporation - Class A pan</td>
+<td align="left">evap_pan</td>
+<td align="left">mm</td>
+</tr>
+<tr class="even">
+<td align="left">Evaporation - synthetic estimate</td>
+<td align="left">evap_syn</td>
+<td align="left">mm</td>
+</tr>
+<tr class="odd">
+<td align="left">Evaporation - combination (synthetic estimate pre-1970, class A pan 1970 onwards)</td>
+<td align="left">evap_comb</td>
+<td align="left">mm</td>
+</tr>
+<tr class="even">
+<td align="left">Evaporation - Morton’s shallow lake evaporation</td>
+<td align="left">evap_morton_lake</td>
+<td align="left">mm</td>
+</tr>
+<tr class="odd">
+<td align="left">Solar radiation - total incoming downward shortwave radiation on a horizontal surface</td>
+<td align="left">radiation</td>
+<td align="left">MJm-2</td>
+</tr>
+<tr class="even">
+<td align="left">Relative humidity at the time of maximum temperature</td>
+<td align="left">rh_tmax</td>
+<td align="left">%</td>
+</tr>
+<tr class="odd">
+<td align="left">Relative humidity at the time of minimum temperature</td>
+<td align="left">rh_tmin</td>
+<td align="left">%</td>
+</tr>
+<tr class="even">
+<td align="left">Evapotranspiration - FAO56 short crop</td>
+<td align="left">et_short_crop</td>
+<td align="left">mm</td>
+</tr>
+<tr class="odd">
+<td align="left">Evapotranspiration - ASCE tall crop</td>
+<td align="left">et_tall_crop</td>
+<td align="left">mm</td>
+</tr>
+<tr class="even">
+<td align="left">Evapotranspiration - Morton’s areal actual evapotranspiration</td>
+<td align="left">et_morton_actual</td>
+<td align="left">mm</td>
+</tr>
+<tr class="odd">
+<td align="left">Evapotranspiration - Morton’s potential evapotranspiration</td>
+<td align="left">et_morton_potential</td>
+<td align="left">mm</td>
+</tr>
+<tr class="even">
+<td align="left">Evapotranspiration - Morton’s wet-environment areal evapotranspiration over land</td>
+<td align="left">et_morton_wet</td>
+<td align="left">mm</td>
+</tr>
+<tr class="odd">
+<td align="left">Mean sea level pressure</td>
+<td align="left">mslp</td>
+<td align="left">hPa</td>
+</tr>
+</tbody>
+</table>
+<p>Next we specify some options to help us select an appropriate weather station. The string <code>loc</code> is used to extract a coordinate using a geocoder. Alternatively you can manually input a longitude and latitude later. The dates <code>startdate</code> and <code>enddate</code> hold the dates across which we require climatic data. The string <code>apikey</code> holds the API key which is required to query the database and freely available upon registration <a href="https://data.qld.gov.au/dataset/silo-climate-api">at the SILO landing page</a>.</p>
+<pre class="r"><code>loc = &#39;Melbourne, Australia&#39;
+startdate = as.Date(&#39;2018-01-01&#39;)
+enddate = as.Date(&#39;2018-12-30&#39;)
+apikey = &#39;PASTE YOUR API KEY HERE&#39;</code></pre>
+<p>Filter the station metadata by station with data for our dates. As an aside, if the station is still in operation the <code>end_year</code> will be <code>NA</code>.</p>
+<pre class="r"><code>stations = stationsmeta %&gt;% 
+  filter(start_year &lt;= format(startdate, &#39;%Y&#39;)) %&gt;%
+  filter(is.na(end_year) | (end_year &gt;= format(enddate, &#39;%Y&#39;)))</code></pre>
+<p>Convert the location string to a coordinate and find the closest weather station to the location.</p>
+<pre class="r"><code>xy = tmaptools::geocode_OSM(loc,as.sf = TRUE)
+near_stat = stations[which.min(st_distance(xy, stations)), ]
+knitr::kable(near_stat)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">number</th>
+<th align="right">start_year</th>
+<th align="right">end_year</th>
+<th align="left">supplier</th>
+<th align="right">elevation</th>
+<th align="left">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">MELBOURNE (OLYMPIC PARK)</td>
+<td align="right">86338</td>
+<td align="right">2013</td>
+<td align="right">NA</td>
+<td align="left">Bureau of Meteorology</td>
+<td align="right">7.5</td>
+<td align="left">c(144.9816, -37.8255)</td>
+</tr>
+</tbody>
+</table>
+<p>We can also explicitly find the distance to the nearest weather station.</p>
+<pre class="r"><code>st_distance(xy, near_stat)</code></pre>
+<pre><code>## Units: [m]
+##          [,1]
+## [1,] 2050.359</code></pre>
+<p>Now we have the weather station id and a date range for which we require data we can query the SILO database.</p>
+<pre class="r"><code>params = list(
+  apikey = apikey,
+  format = &#39;csv&#39;,
+  station = near_stat$number,
+  start = format(startdate, &#39;%Y%m%d&#39;),
+  finish = format(enddate, &#39;%Y%m%d&#39;),
+  variables = &#39;max_temp,min_temp,radiation,daily_rain&#39;
+)
+res &lt;- httr::GET(&quot;https://siloapi.longpaddock.qld.gov.au/pointdata&quot;, query=params)
+silodata &lt;- read_csv(httr::content(res, as=&quot;text&quot;)) 
+head(silodata)</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   station date       daily_rain daily_rain_sour~ max_temp max_temp_source
+##     &lt;int&gt; &lt;date&gt;          &lt;dbl&gt;            &lt;int&gt;    &lt;dbl&gt;           &lt;int&gt;
+## 1   86338 2018-01-01        0                  0     25.3               0
+## 2   86338 2018-01-02        0                  0     21.8               0
+## 3   86338 2018-01-03        0                  0     21                 0
+## 4   86338 2018-01-04        0.2                0     23.6               0
+## 5   86338 2018-01-05        0                  0     30.7               0
+## 6   86338 2018-01-06        0                  0     41.7               0
+## # ... with 4 more variables: min_temp &lt;dbl&gt;, min_temp_source &lt;int&gt;,
+## #   radiation &lt;dbl&gt;, radiation_source &lt;int&gt;</code></pre>
+<p>And finally, plot the data.</p>
+<pre class="r"><code>silodata %&gt;% 
+  select(date, `Rain, mm` = daily_rain, `Min temp, C` =min_temp, `Max temp, C` = max_temp) %&gt;%
+  gather(variable, value, -date) %&gt;%
+  ggplot() + 
+    geom_line(aes(date, value, colour = variable)) + 
+    xlab(&#39;&#39;) + ylab(&#39;&#39;) +
+    ggtitle(loc) + 
+    mydarktheme</code></pre>
+<p><img src="/post/2018-12-31-accessing-silo-climatic-data-for-australia-in-r_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
