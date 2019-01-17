@@ -1,0 +1,265 @@
+---
+title: Tutorial on quantifying species detection probabilities during surveillance with stan in R
+author: ~
+date: '2019-01-17'
+slug: tutorial-on-quantifying-species-detection-probabilities-during-surveillance
+categories: []
+tags: ["bayesian", "stan", "monitorring", "resistance", "biosecurity", "exponential", "logistic", "R"]
+header:
+  caption: 'Quantifying detection of eggs'
+  image: 'eastereggs.jpg'
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+source('data/useful_scripts/mydarktheme.R')
+```
+
+A practical question in biosecurity surveillance is "How much search effort is required to detect a species?". This can be quantified under controlled conditions where the number and location of target species are known and participants are recruited to see how success rate varies. 
+
+Let's use an example of an easter egg hunt where the adult (the researcher) wants to quantify how much effort it takes a child (the participant) to find an easter egg. Imagine that we let each child complete the easter egg course, and it is reset to the same condition before each new child.
+
+```{r}
+library(tidyverse)
+library(rethinking)
+```
+
+Here is a data summary of a such a trial [^1]. 
+
+```{r, echo=F}
+d = read_csv('data/detection_prob/Moore2011.csv', col_types = 'icnnniin')
+knitr::kable(d)
+```
+
+This table shows some child level characteristics that might effect detection, such as whether or not they have had any prior experience looking for easter eggs. But suppose we want to control for some property of the hidden easter egg, such as the size of the egg in grams, where we might pressume that larger eggs are easier to find. Here I separate out the data into Bernoulli form (1s for detections and 0s for misses) and assign a random egg size between 10 and 100 g. 
+
+
+```{r}
+set.seed(111) # fix random numbers
+# convert summary data to long format (Bernoulli trials)
+total_eggs = 23
+db = d %>%
+  rowwise() %>%
+  mutate(detection = list(rep(c(0, 1), c(no_sets_encountered - no_sets_detected, no_sets_detected)))) %>%
+  dplyr::select(-no_sets_encountered,-no_sets_detected, -percent_detected) %>%
+  unnest() %>%
+  
+  # assign id to eggs and then random size
+  group_by(participant) %>%
+  mutate(egg_id = sample(1:total_eggs,n(),replace = FALSE)) %>%
+  ungroup %>%
+  mutate(egg_size = runif(total_eggs, 10,100)[egg_id]) %>%
+  mutate(experience = ifelse(experience == 'yes', 1, 0)) %>%
+  mutate(log_search_effort_h_ha = log(search_effort_h_ha)) %>%
+  
+  # it is good practice to use centred variable (mean = 0) for parameter interpretation and fitting
+  mutate(egg_size_c = egg_size - mean(egg_size)) %>%
+  as.data.frame
+  
+knitr::kable(head(db))
+```
+
+So now that we have some characterics of the child (e.g. search effort), and each hidden egg (e.g. size) that are expected to affect detection probabilities it is time to model it. 
+
+Each encounter ($X_{i,j}$) with an egg j by child i can be considered a draw from a Bernoulli distribution with parameter $p_{i,j}$, which is the probability of detecting the egg given it was present:
+
+$$X_{i,j} \sim \textrm{dbern}(p_{i,j})$$
+
+The are many ways to model the probability of detection. One is to assume an exponential relationship with search effort where $p_{i,j}$ is given by: 
+
+$$p_{i,j} = 1 - exp(-\lambda_{i,j} f_j)$$ 
+
+where $f_i$ is the search effort per unit area of child i, and $\lambda_{i,j}$i,j is the rate of detection of plant set j by observer i, modelled as a log-linear function of factors identified as likely to influence detectability or:
+
+$$\ln(\lambda_{i,j}) = a + f(s_j) + g(e_i) + \textrm{obs}_i$$
+where $a$ is the intercept term, $f(s_j)$ is the effect of egg size, and $g(e_i)$ is the effect child experience. The reference level of child experience is 'no experience'. 
+
+On to fitting. First, get some reasonable initial values for the model.
+```{r}
+a = 0.17  
+b = 0.001
+c = 0.125
+db %>% 
+  mutate(pred_hauser =  1 - exp(-(a + b*egg_size_c + c*experience) * search_effort_h_ha)) %>% 
+  dplyr::select(pred_hauser, detection) %>%
+  head
+
+```
+Then fit the model using Richard McElreath's `rethinking` package and `rstan`.
+
+```{r, echo=FALSE}
+load('data/detection_prob/m1.Rdata')
+```
+
+```{r, eval = FALSE}
+m1 <- rethinking::map2stan(
+  alist(
+    detection ~ dbinom( 1 , 1 - exp(-lambda_f) ),
+    lambda_f <-  (a + b*egg_size_c + c*experience + obs[participant]) * search_effort_h_ha ,
+    a ~ dnorm(0, 10),
+    b ~ dnorm(0, 10),
+    c ~ dnorm(0, 10),
+    obs[participant] ~ dnorm(0, sigma) ,
+    sigma ~ dcauchy(0,1)
+  ),
+  data = db, 
+  start = list(a=0.17, b = 0.001, c=0.125, sigma = 0.3) ,
+  # constraints=list(d ="lower=0"),
+  chains=1 , iter=10000 , warmup=1000
+)
+save(m1, file = 'data/detection_prob/m1.Rdata')
+```
+
+```{r}
+# summary output
+precis(m1)
+
+# plot detection probability vs. effort
+pars = precis(m1)@output$Mean
+names(pars) = rownames(precis(m1)@output)
+pred_line =  expand.grid(search_effort_h_ha = seq(0, 10, length = 100),
+                         egg_size = c(10, 30, 100),
+                         experience = 0:1) %>%
+  mutate(egg_size_c = egg_size - mean(db$egg_size)) %>%
+  mutate(pred = 1 - exp(-((pars['a'] + pars['b']*egg_size_c + pars['c']*experience) * search_effort_h_ha))) 
+ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(egg_size_c), linetype = factor(experience))) +
+  geom_line() +
+  ylab('predicted detection probability') +
+  xlab('search effort, h/ha') +
+  mydarktheme
+
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+# This keeps crashing for some reason
+
+# a = 1
+# db %>% 
+#   mutate(pred_hauser =  1 - exp(-(a + dnorm(0, 1)) * search_effort_h_ha)) %>% 
+#   dplyr::select(pred_hauser, detection)
+
+# m1.1 <- rethinking::map2stan(
+#   alist(
+#     detection ~ dbinom( 1 , 1 - exp(-lambda) ),
+#     lambda <-  (a + obs[participant]) * search_effort_h_ha ,
+#     a ~ dnorm(0, 10),
+#     obs[participant] ~ dnorm(0, sigma) ,
+#     sigma ~ dcauchy(0,1)
+#   ),
+#   data = db, 
+#   start = list(a=1, sigma = 1),# sigma = 0.3) ,
+#   # constraints=list(d ="lower=0"),
+#   chains=1 , iter=10000 , warmup=1000
+# )
+# precis(m1.1)
+```
+
+In choosing to implement this model in stan, I found myself a world of hurt. I have never seen so many error messages as I fumbled my way through red words trying to make a log-link function work with a binomial regression (or some other way to restrict the value of $\lambda$ to positive values else break the contraint $0<p<1$). Even the output above with Rhat > 1 hints that there may be some issues. Here is a helpful thread  [a thread in a stan forum](https://discourse.mc-stan.org/t/binomial-regression-with-a-log-link/4102/8). The key piece of insight is that probabilities have to be between 0 and 1. If you have some linear function `y = a + x * b`, which can take on any real value, then `inv_logit(y)` is always a valid probability, but not `exp(y)`.
+
+For this reason, I explored a more conventional approach using the `logit` link function where our linear function is framed around the log odds ratio $\ln(\frac{p}{1-p})$. I ended up with a pretty similar model. 
+
+$$p_{i,j} = \frac{1}{1 - exp(-y_{i,j})}$$ 
+where
+
+$$y_{i,j} = a + f(s_j) + g(e_i) + d \log(f_i) + \textrm{obs}_i$$
+and the variables are defined as before, with the exception that $h(f_i) = d \log(f_i)$.
+
+Expressing the equation in terms of the odds ratio help interpretabilty. 
+
+$$\frac{p}{1-p} = exp(a + f(s_j) + g(e_i) + \textrm{obs}_i)f_i^d$$
+
+The odds of detection (rather than probability) scales with survey effort to the power of d.
+
+Reasonable initial values are less important in this model as the logit function properly restricts fitted probabilities to between 0 and 1.
+
+```{r, echo=F}
+load('data/detection_prob/m2.Rdata')
+```
+
+```{r, eval=FALSE}
+m2 <- rethinking::map2stan(
+  alist(
+    detection ~ dbinom( 1 , p ),
+    logit(p) <-  a + b*egg_size_c + c*experience + d*log_search_effort_h_ha + obs[participant]  ,
+    a ~ dnorm(0, 10),
+    b ~ dnorm(0, 10),
+    c ~ dnorm(0, 10),
+    d ~ dnorm(0, 10),
+    obs[participant] ~ dnorm(0, sigma) ,
+    sigma ~ dcauchy(0,1)
+  ),
+  data = db, 
+  chains=1 , iter=10000 , warmup=1000
+)
+save(m2, file = 'data/detection_prob/m2.Rdata')
+```
+
+
+```{r}
+# summarise model 
+precis(m2)
+
+# plot detection probability vs effort
+pars = precis(m2)@output$Mean
+names(pars) = rownames(precis(m2)@output)
+pred_line =  expand.grid(search_effort_h_ha = seq(0, 10, length = 100),
+                         egg_size = c(10, 30, 100),
+                         egg_size_c = c(10, 30, 100) - mean(db$egg_size),
+                         experience = 0:1) %>%
+  mutate(log_search_effort_h_ha = log(search_effort_h_ha)) %>%
+  mutate(pred = inv_logit(
+    pars['a'] + pars['b']*egg_size_c +
+      pars['c']*experience + pars['d']*log_search_effort_h_ha)) 
+
+ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(egg_size_c), linetype = factor(experience))) +
+  geom_line() +
+  ylim(0,1) +
+  ylab('predicted detection probability') +
+  xlab('search effort, h/ha') +
+  mydarktheme
+
+```
+
+Look at that sweet convergence. 
+
+```{r, eval=FALSE, echo=FALSE}
+# This keeps crashing for some reason
+# m2.1 <- rethinking::map2stan(
+#   alist(
+#     detection ~ dbinom( 1 , p ),
+#     logit(p) <-  a + obs[participant] + d*log_search_effort_h_ha ,
+#     a ~ dnorm(0, 10),
+#     d ~ dnorm(0, 10),
+#     obs[participant] ~ dnorm(0, sigma) ,
+#     sigma ~ dcauchy(0,1)
+#   ),
+#   data = db, 
+#   # start = list(a=0.17, b = 0.004, c=0.125, sigma = 0.3) ,
+#   # constraints=list(d ="lower=0"),
+#   chains=1 , iter=1000 , warmup=100
+# )
+```
+
+
+
+
+
+```{r, eval=FALSE, echo=FALSE}
+# call model in stan
+standata = list(N = nrow(db), 
+                N_participant = max(db$participant), 
+                detection   = db$detection,
+                experience  = db$experience,
+                participant = db$participant,
+                egg_size_c  = db$egg_size_c, 
+                experience  = db$experience,
+                search_effort_h_ha = db$search_effort_h_ha
+                )
+fit <- stan(file = 'data/detection_prob/m1.stan', data = standata, chains=1 , iter=10000 , warmup=1000)
+
+```
+
+
+
+[^1]: This is real data but instead of easter eggs, participants were asked to survey for hawkweed in the Victorian alps. Data is from Moore, J. L., Hauser, C. E., Bear, J. L., Williams, N. S. and McCarthy, M. A. (2011), Estimating detection–effort curves for plants using search experiments. Ecological Applications, 21: 601-607. doi:10.1890/10-0590.1
