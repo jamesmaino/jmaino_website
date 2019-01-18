@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 source('data/useful_scripts/mydarktheme.R')
 ```
 
-A practical question in biosecurity surveillance is "How much search effort is required to detect a species?". This can be quantified under controlled conditions where the number and location of target species are known and participants are recruited to see how success rate varies. 
+A practical question in species surveillance is "How much search effort is required for detection?". This can be quantified under controlled conditions where the number and location of target species are known and participants are recruited to see how success rate varies. 
 
 Let's use an example of an easter egg hunt where the adult (the researcher) wants to quantify how much effort it takes a child (the participant) to find an easter egg. Imagine that we let each child complete the easter egg course, and it is reset to the same condition before each new child.
 
@@ -74,6 +74,8 @@ where $f_i$ is the search effort per unit area of child i, and $\lambda_{i,j}$i,
 $$\ln(\lambda_{i,j}) = a + f(s_j) + g(e_i) + \textrm{obs}_i$$
 where $a$ is the intercept term, $f(s_j)$ is the effect of egg size, and $g(e_i)$ is the effect child experience. The reference level of child experience is 'no experience'. 
 
+For an intuitive explanation of commonly used probability distributions, see [this previous post](/post/generating-probability-distribution-with-natural-examples) and [this one on bayesian vs. frequentist binomial responses](/post/bayesian-and-frequentist-logistic-regression-in-r). 
+
 On to fitting. First, get some reasonable initial values for the model.
 ```{r}
 a = 0.17  
@@ -117,19 +119,34 @@ precis(m1)
 # plot detection probability vs. effort
 pars = precis(m1)@output$Mean
 names(pars) = rownames(precis(m1)@output)
+obs = precis(m1, depth = 2)@output$Mean[5:16]
 pred_line =  expand.grid(search_effort_h_ha = seq(0, 10, length = 100),
-                         egg_size = c(10, 30, 100),
-                         experience = 0:1) %>%
-  mutate(egg_size_c = egg_size - mean(db$egg_size)) %>%
-  mutate(pred = 1 - exp(-((pars['a'] + pars['b']*egg_size_c + pars['c']*experience) * search_effort_h_ha))) 
-ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(egg_size_c), linetype = factor(experience))) +
-  geom_line() +
+                         egg_size = c(60.5),
+                         experience = 0:1, 
+                         participant = 1) %>% # placeholder participant
+  mutate(egg_size_c = egg_size - mean(db$egg_size))
+# create matrix of zeros getting mean of random effect
+participant_zeros = matrix(0, 1000, max(d$participant)) 
+mu <- link(m1, data=pred_line, replace=list(obs=participant_zeros))
+pred_line$pred <- 1 - exp(-apply( mu , 2 , mean ))
+pred_line[,c('lower','upper')] <- t(1 - exp(-apply(mu, 2, PI, prob = 0.89)))
+
+# predictions for each participant with random effect (at mean egg size) 
+d = d %>%
+  mutate(pred = 1 - exp(-((pars['a'] + pars['b']*0 + pars['c']*(experience=='yes') + obs[participant]) * search_effort_h_ha)))
+ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
+  geom_line(aes(linetype = factor(experience))) +
+  geom_line(aes(y=lower, linetype = factor(experience))) +
+  geom_line(aes(y=upper, linetype = factor(experience))) +
+  geom_ribbon(aes(ymin=lower,ymax=upper,fill = factor(experience), color = NULL), alpha = 0.2) +
+  geom_point(data = d, aes(linetype = NULL), colour = 'white', shape = 1) +
+  geom_point(data = d, aes(y = percent_detected/100), colour = 'white') +
   ylab('predicted detection probability') +
   xlab('search effort, h/ha') +
   mydarktheme
 
 ```
-
+**Figure 1.** Plot of model 1 predicted detection probability as a function of search effort. Filled circles show observed detected percentages by each participant, while hollow circles show predicted probabilities for each observer’s measured effort level and fitted random effect (egg size is set to mean). Shaded regions shows 89% credible interval.
 
 ```{r, eval=FALSE, echo=FALSE}
 # This keeps crashing for some reason
@@ -165,7 +182,7 @@ where
 $$y_{i,j} = a + f(s_j) + g(e_i) + d \log(f_i) + \textrm{obs}_i$$
 and the variables are defined as before, with the exception that $h(f_i) = d \log(f_i)$.
 
-Expressing the equation in terms of the odds ratio help interpretabilty. 
+Expressing the equation in terms of the odds ratio helps interpretabilty. 
 
 $$\frac{p}{1-p} = exp(a + f(s_j) + g(e_i) + \textrm{obs}_i)f_i^d$$
 
@@ -203,23 +220,37 @@ precis(m2)
 # plot detection probability vs effort
 pars = precis(m2)@output$Mean
 names(pars) = rownames(precis(m2)@output)
+obs = precis(m2, depth = 2)@output$Mean[4:16]
 pred_line =  expand.grid(search_effort_h_ha = seq(0, 10, length = 100),
-                         egg_size = c(10, 30, 100),
-                         egg_size_c = c(10, 30, 100) - mean(db$egg_size),
-                         experience = 0:1) %>%
-  mutate(log_search_effort_h_ha = log(search_effort_h_ha)) %>%
-  mutate(pred = inv_logit(
-    pars['a'] + pars['b']*egg_size_c +
-      pars['c']*experience + pars['d']*log_search_effort_h_ha)) 
+                         egg_size = c(60.5),
+                         experience = 0:1,
+                         participant = 1) %>% # participant place holder
+  mutate(egg_size_c = egg_size - mean(db$egg_size)) %>%
+  mutate(log_search_effort_h_ha = log(search_effort_h_ha))
 
-ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(egg_size_c), linetype = factor(experience))) +
-  geom_line() +
-  ylim(0,1) +
+# create matrix of zeros getting mean of random effect
+participant_zeros = matrix(0, 1000, max(d$participant)) 
+mu <- link(m2, data=pred_line, replace=list(obs=participant_zeros))
+pred_line$pred <- (apply( mu , 2 , mean ))
+pred_line[,c('lower','upper')] <- t((apply( mu , 2 , PI, prob = 0.89 )))
+
+# predictions for each participant with random effect (at mean egg size) 
+d = d %>%
+  mutate(pred = (inv_logit(pars['a'] + pars['b']*0 + pars['c']*(experience=='yes') + pars['d']*log(search_effort_h_ha) + obs[participant])))
+ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
+  geom_line(aes(linetype = factor(experience))) +
+  geom_line(aes(y=lower, linetype = factor(experience))) +
+  geom_line(aes(y=upper, linetype = factor(experience))) +
+  geom_ribbon(aes(ymin=lower,ymax=upper,fill = factor(experience), color = NULL), alpha = 0.2) +
+  geom_point(data = d, aes(linetype = NULL), colour = 'white', shape = 1) +
+  geom_point(data = d, aes(y = percent_detected/100), colour = 'white') +
   ylab('predicted detection probability') +
   xlab('search effort, h/ha') +
   mydarktheme
 
 ```
+
+**Figure 2.** Plot of model 2 predicted detection probability as a function of search effort. Filled circles show observed detected percentages by each participant, while hollow circles show predicted probabilities for each observer’s measured effort level and fitted random effect (egg size is set to mean). Shaded regions shows 89% credible interval.
 
 Look at that sweet convergence. 
 

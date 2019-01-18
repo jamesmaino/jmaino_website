@@ -12,7 +12,7 @@ header:
 
 
 
-<p>A practical question in biosecurity surveillance is “How much search effort is required to detect a species?”. This can be quantified under controlled conditions where the number and location of target species are known and participants are recruited to see how success rate varies.</p>
+<p>A practical question in species surveillance is “How much search effort is required for detection?”. This can be quantified under controlled conditions where the number and location of target species are known and participants are recruited to see how success rate varies.</p>
 <p>Let’s use an example of an easter egg hunt where the adult (the researcher) wants to quantify how much effort it takes a child (the participant) to find an easter egg. Imagine that we let each child complete the easter egg course, and it is reset to the same condition before each new child.</p>
 <pre class="r"><code>library(tidyverse)
 library(rethinking)</code></pre>
@@ -274,6 +274,7 @@ knitr::kable(head(db))</code></pre>
 <p>where <span class="math inline">\(f_i\)</span> is the search effort per unit area of child i, and <span class="math inline">\(\lambda_{i,j}\)</span>i,j is the rate of detection of plant set j by observer i, modelled as a log-linear function of factors identified as likely to influence detectability or:</p>
 <p><span class="math display">\[\ln(\lambda_{i,j}) = a + f(s_j) + g(e_i) + \textrm{obs}_i\]</span>
 where <span class="math inline">\(a\)</span> is the intercept term, <span class="math inline">\(f(s_j)\)</span> is the effect of egg size, and <span class="math inline">\(g(e_i)\)</span> is the effect child experience. The reference level of child experience is ‘no experience’.</p>
+<p>For an intuitive explanation of commonly used probability distributions, see <a href="/post/generating-probability-distribution-with-natural-examples">this previous post</a> and <a href="/post/bayesian-and-frequentist-logistic-regression-in-r">this one on bayesian vs. frequentist binomial responses</a>.</p>
 <p>On to fitting. First, get some reasonable initial values for the model.</p>
 <pre class="r"><code>a = 0.17  
 b = 0.001
@@ -316,24 +317,50 @@ precis(m1)</code></pre>
 <pre class="r"><code># plot detection probability vs. effort
 pars = precis(m1)@output$Mean
 names(pars) = rownames(precis(m1)@output)
+obs = precis(m1, depth = 2)@output$Mean[5:16]
 pred_line =  expand.grid(search_effort_h_ha = seq(0, 10, length = 100),
-                         egg_size = c(10, 30, 100),
-                         experience = 0:1) %&gt;%
-  mutate(egg_size_c = egg_size - mean(db$egg_size)) %&gt;%
-  mutate(pred = 1 - exp(-((pars[&#39;a&#39;] + pars[&#39;b&#39;]*egg_size_c + pars[&#39;c&#39;]*experience) * search_effort_h_ha))) 
-ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(egg_size_c), linetype = factor(experience))) +
-  geom_line() +
+                         egg_size = c(60.5),
+                         experience = 0:1, 
+                         participant = 1) %&gt;% # placeholder participant
+  mutate(egg_size_c = egg_size - mean(db$egg_size))
+# create matrix of zeros getting mean of random effect
+participant_zeros = matrix(0, 1000, max(d$participant)) 
+mu &lt;- link(m1, data=pred_line, replace=list(obs=participant_zeros))</code></pre>
+<pre><code>## [ 100 / 1000 ]
+[ 200 / 1000 ]
+[ 300 / 1000 ]
+[ 400 / 1000 ]
+[ 500 / 1000 ]
+[ 600 / 1000 ]
+[ 700 / 1000 ]
+[ 800 / 1000 ]
+[ 900 / 1000 ]
+[ 1000 / 1000 ]</code></pre>
+<pre class="r"><code>pred_line$pred &lt;- 1 - exp(-apply( mu , 2 , mean ))
+pred_line[,c(&#39;lower&#39;,&#39;upper&#39;)] &lt;- t(1 - exp(-apply(mu, 2, PI, prob = 0.89)))
+
+# predictions for each participant with random effect (at mean egg size) 
+d = d %&gt;%
+  mutate(pred = 1 - exp(-((pars[&#39;a&#39;] + pars[&#39;b&#39;]*0 + pars[&#39;c&#39;]*(experience==&#39;yes&#39;) + obs[participant]) * search_effort_h_ha)))
+ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
+  geom_line(aes(linetype = factor(experience))) +
+  geom_line(aes(y=lower, linetype = factor(experience))) +
+  geom_line(aes(y=upper, linetype = factor(experience))) +
+  geom_ribbon(aes(ymin=lower,ymax=upper,fill = factor(experience), color = NULL), alpha = 0.2) +
+  geom_point(data = d, aes(linetype = NULL), colour = &#39;white&#39;, shape = 1) +
+  geom_point(data = d, aes(y = percent_detected/100), colour = &#39;white&#39;) +
   ylab(&#39;predicted detection probability&#39;) +
   xlab(&#39;search effort, h/ha&#39;) +
   mydarktheme</code></pre>
-<p><img src="/post/2019-01-17-quantifying-species-detection-probabilities-during-surveillance_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="/post/2019-01-17-quantifying-species-detection-probabilities-during-surveillance_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+<strong>Figure 1.</strong> Plot of model 1 predicted detection probability as a function of search effort. Filled circles show observed detected percentages by each participant, while hollow circles show predicted probabilities for each observer’s measured effort level and fitted random effect (egg size is set to mean). Shaded regions shows 89% credible interval.</p>
 <p>In choosing to implement this model in stan, I found myself a world of hurt. I have never seen so many error messages as I fumbled my way through red words trying to make a log-link function work with a binomial regression (or some other way to restrict the value of <span class="math inline">\(\lambda\)</span> to positive values else break the contraint <span class="math inline">\(0&lt;p&lt;1\)</span>). Even the output above with Rhat &gt; 1 hints that there may be some issues. Here is a helpful thread <a href="https://discourse.mc-stan.org/t/binomial-regression-with-a-log-link/4102/8">a thread in a stan forum</a>. The key piece of insight is that probabilities have to be between 0 and 1. If you have some linear function <code>y = a + x * b</code>, which can take on any real value, then <code>inv_logit(y)</code> is always a valid probability, but not <code>exp(y)</code>.</p>
 <p>For this reason, I explored a more conventional approach using the <code>logit</code> link function where our linear function is framed around the log odds ratio <span class="math inline">\(\ln(\frac{p}{1-p})\)</span>. I ended up with a pretty similar model.</p>
 <p><span class="math display">\[p_{i,j} = \frac{1}{1 - exp(-y_{i,j})}\]</span>
 where</p>
 <p><span class="math display">\[y_{i,j} = a + f(s_j) + g(e_i) + d \log(f_i) + \textrm{obs}_i\]</span>
 and the variables are defined as before, with the exception that <span class="math inline">\(h(f_i) = d \log(f_i)\)</span>.</p>
-<p>Expressing the equation in terms of the odds ratio help interpretabilty.</p>
+<p>Expressing the equation in terms of the odds ratio helps interpretabilty.</p>
 <p><span class="math display">\[\frac{p}{1-p} = exp(a + f(s_j) + g(e_i) + \textrm{obs}_i)f_i^d\]</span></p>
 <p>The odds of detection (rather than probability) scales with survey effort to the power of d.</p>
 <p>Reasonable initial values are less important in this model as the logit function properly restricts fitted probabilities to between 0 and 1.</p>
@@ -363,22 +390,45 @@ precis(m2)</code></pre>
 <pre class="r"><code># plot detection probability vs effort
 pars = precis(m2)@output$Mean
 names(pars) = rownames(precis(m2)@output)
+obs = precis(m2, depth = 2)@output$Mean[4:16]
 pred_line =  expand.grid(search_effort_h_ha = seq(0, 10, length = 100),
-                         egg_size = c(10, 30, 100),
-                         egg_size_c = c(10, 30, 100) - mean(db$egg_size),
-                         experience = 0:1) %&gt;%
-  mutate(log_search_effort_h_ha = log(search_effort_h_ha)) %&gt;%
-  mutate(pred = inv_logit(
-    pars[&#39;a&#39;] + pars[&#39;b&#39;]*egg_size_c +
-      pars[&#39;c&#39;]*experience + pars[&#39;d&#39;]*log_search_effort_h_ha)) 
+                         egg_size = c(60.5),
+                         experience = 0:1,
+                         participant = 1) %&gt;% # participant place holder
+  mutate(egg_size_c = egg_size - mean(db$egg_size)) %&gt;%
+  mutate(log_search_effort_h_ha = log(search_effort_h_ha))
 
-ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(egg_size_c), linetype = factor(experience))) +
-  geom_line() +
-  ylim(0,1) +
+# create matrix of zeros getting mean of random effect
+participant_zeros = matrix(0, 1000, max(d$participant)) 
+mu &lt;- link(m2, data=pred_line, replace=list(obs=participant_zeros))</code></pre>
+<pre><code>## [ 100 / 1000 ]
+[ 200 / 1000 ]
+[ 300 / 1000 ]
+[ 400 / 1000 ]
+[ 500 / 1000 ]
+[ 600 / 1000 ]
+[ 700 / 1000 ]
+[ 800 / 1000 ]
+[ 900 / 1000 ]
+[ 1000 / 1000 ]</code></pre>
+<pre class="r"><code>pred_line$pred &lt;- (apply( mu , 2 , mean ))
+pred_line[,c(&#39;lower&#39;,&#39;upper&#39;)] &lt;- t((apply( mu , 2 , PI, prob = 0.89 )))
+
+# predictions for each participant with random effect (at mean egg size) 
+d = d %&gt;%
+  mutate(pred = (inv_logit(pars[&#39;a&#39;] + pars[&#39;b&#39;]*0 + pars[&#39;c&#39;]*(experience==&#39;yes&#39;) + pars[&#39;d&#39;]*log(search_effort_h_ha) + obs[participant])))
+ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
+  geom_line(aes(linetype = factor(experience))) +
+  geom_line(aes(y=lower, linetype = factor(experience))) +
+  geom_line(aes(y=upper, linetype = factor(experience))) +
+  geom_ribbon(aes(ymin=lower,ymax=upper,fill = factor(experience), color = NULL), alpha = 0.2) +
+  geom_point(data = d, aes(linetype = NULL), colour = &#39;white&#39;, shape = 1) +
+  geom_point(data = d, aes(y = percent_detected/100), colour = &#39;white&#39;) +
   ylab(&#39;predicted detection probability&#39;) +
   xlab(&#39;search effort, h/ha&#39;) +
   mydarktheme</code></pre>
 <p><img src="/post/2019-01-17-quantifying-species-detection-probabilities-during-surveillance_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><strong>Figure 2.</strong> Plot of model 2 predicted detection probability as a function of search effort. Filled circles show observed detected percentages by each participant, while hollow circles show predicted probabilities for each observer’s measured effort level and fitted random effect (egg size is set to mean). Shaded regions shows 89% credible interval.</p>
 <p>Look at that sweet convergence.</p>
 <div class="footnotes">
 <hr />
