@@ -69,10 +69,10 @@ The are many ways to model the probability of detection. One is to assume an exp
 
 $$p_{i,j} = 1 - exp(-\lambda_{i,j} f_j)$$ 
 
-where $f_i$ is the search effort per unit area of child i, and $\lambda_{i,j}$i,j is the rate of detection of plant set j by observer i, modelled as a log-linear function of factors identified as likely to influence detectability or:
+where $f_i$ is the search effort per unit area of child i, and $\lambda_{i,j}$ is the rate of detection of plant set j by observer i, modelled as a log-linear function of factors identified as likely to influence detectability or:
 
-$$\ln(\lambda_{i,j}) = a + f(s_j) + g(e_i) + \textrm{obs}_i$$
-where $a$ is the intercept term, $f(s_j)$ is the effect of egg size, and $g(e_i)$ is the effect child experience. The reference level of child experience is 'no experience'. 
+$$\ln(\lambda_{i,j}) = a + b.s_j + c.e_i + \textrm{obs}_i$$
+where $a$ is the intercept term, $b$ is the effect of egg size $s_j$, and $c$ is the effect child experience $e_i$. The reference level of child experience is 'no experience'. 
 
 For an intuitive explanation of commonly used probability distributions, see [this previous post](/post/generating-probability-distribution-with-natural-examples) and [this one on bayesian vs. frequentist binomial responses](/post/bayesian-and-frequentist-logistic-regression-in-r). 
 
@@ -82,12 +82,12 @@ a = 0.17
 b = 0.001
 c = 0.125
 db %>% 
-  mutate(pred_hauser =  1 - exp(-(a + b*egg_size_c + c*experience) * search_effort_h_ha)) %>% 
-  dplyr::select(pred_hauser, detection) %>%
+  mutate(pred =  1 - exp(-(a + b*egg_size_c + c*experience + log_search_effort_h_ha))) %>% 
+  dplyr::select(pred, detection) %>%
   head
 
 ```
-Then fit the model using Richard McElreath's `rethinking` package and `rstan`.
+Then fit the model using Richard McElreath's `rethinking` package and `rstan`. Note that we are kind of pushing the limits the syntax that the `rethinking` package can handle so there are a couple of errors when computing statisitics like the WAIC.  
 
 ```{r, echo=FALSE}
 load('data/detection_prob/m1.Rdata')
@@ -97,7 +97,7 @@ load('data/detection_prob/m1.Rdata')
 m1 <- rethinking::map2stan(
   alist(
     detection ~ dbinom( 1 , 1 - exp(-lambda_f) ),
-    lambda_f <-  (a + b*egg_size_c + c*experience + obs[participant]) * search_effort_h_ha ,
+    log(lambda_f) <-  (a + b*egg_size_c + c*experience + log_search_effort_h_ha + obs[participant]),
     a ~ dnorm(0, 10),
     b ~ dnorm(0, 10),
     c ~ dnorm(0, 10),
@@ -106,24 +106,31 @@ m1 <- rethinking::map2stan(
   ),
   data = db, 
   start = list(a=0.17, b = 0.001, c=0.125, sigma = 0.3) ,
-  # constraints=list(d ="lower=0"),
   chains=1 , iter=10000 , warmup=1000
+  
 )
 save(m1, file = 'data/detection_prob/m1.Rdata')
+
 ```
+
+The precis output shows that 0.89 credible intervals excluded both the experience covariate and the randomly generated egg size covariate. 
 
 ```{r}
 # summary output
 precis(m1)
+```
 
+
+```{r, fig.width=8, fig.height=4}
 # plot detection probability vs. effort
 pars = precis(m1)@output$Mean
 names(pars) = rownames(precis(m1)@output)
 obs = precis(m1, depth = 2)@output$Mean[5:16]
-pred_line =  expand.grid(search_effort_h_ha = seq(0, 10, length = 100),
+pred_line =  expand.grid(search_effort_h_ha = 10^seq(-1, 1, length = 100),
                          egg_size = c(60.5),
                          experience = 0:1, 
                          participant = 1) %>% # placeholder participant
+  mutate(log_search_effort_h_ha = log(search_effort_h_ha)) %>%
   mutate(egg_size_c = egg_size - mean(db$egg_size))
 # create matrix of zeros getting mean of random effect
 participant_zeros = matrix(0, 1000, max(d$participant)) 
@@ -133,8 +140,9 @@ pred_line[,c('lower','upper')] <- t(1 - exp(-apply(mu, 2, PI, prob = 0.89)))
 
 # predictions for each participant with random effect (at mean egg size) 
 d = d %>%
-  mutate(pred = 1 - exp(-((pars['a'] + pars['b']*0 + pars['c']*(experience=='yes') + obs[participant]) * search_effort_h_ha)))
-ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
+  mutate(log_search_effort_h_ha = log(search_effort_h_ha)) %>%
+  mutate(pred = 1 - exp(-exp((pars['a'] + pars['b']*0 + pars['c']*(experience=='yes') + log_search_effort_h_ha + obs[participant]))))
+p1 = ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
   geom_line(aes(linetype = factor(experience))) +
   geom_line(aes(y=lower, linetype = factor(experience))) +
   geom_line(aes(y=upper, linetype = factor(experience))) +
@@ -143,18 +151,21 @@ ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
   geom_point(data = d, aes(y = percent_detected/100), colour = 'white') +
   ylab('predicted detection probability') +
   xlab('search effort, h/ha') +
+  guides(fill=F, colour = F, linetype = F) + 
+  ggtitle('Model 1') +
   mydarktheme
+cowplot::plot_grid( p1, p1 + ggtitle('')+ scale_x_log10(), ncol=2)
 
 ```
-**Figure 1.** Plot of model 1 predicted detection probability as a function of search effort. Filled circles show observed detected percentages by each participant, while hollow circles show predicted probabilities for each observer’s measured effort level and fitted random effect (egg size is set to mean). Shaded regions shows 89% credible interval.
+**Figure 1.** Plot of model 1 predicted detection probability as a function of search effort. Filled circles show observed detected percentages by each participant, while hollow circles show predicted probabilities for each observer’s measured effort level and fitted random effect (egg size is set to mean). Shaded regions shows 89% credible interval. Prediction for experienced individuals shown with blue (vs red for not-experienced).
 
 ```{r, eval=FALSE, echo=FALSE}
 # This keeps crashing for some reason
 
 # a = 1
 # db %>% 
-#   mutate(pred_hauser =  1 - exp(-(a + dnorm(0, 1)) * search_effort_h_ha)) %>% 
-#   dplyr::select(pred_hauser, detection)
+#   mutate(pred =  1 - exp(-(a + dnorm(0, 1)) * search_effort_h_ha)) %>% 
+#   dplyr::select(pred, detection)
 
 # m1.1 <- rethinking::map2stan(
 #   alist(
@@ -172,23 +183,23 @@ ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
 # precis(m1.1)
 ```
 
-In choosing to implement this model in stan, I found myself a world of hurt. I have never seen so many error messages as I fumbled my way through red words trying to make a log-link function work with a binomial regression (or some other way to restrict the value of $\lambda$ to positive values else break the contraint $0<p<1$). Even the output above with Rhat > 1 hints that there may be some issues. Here is a helpful thread  [a thread in a stan forum](https://discourse.mc-stan.org/t/binomial-regression-with-a-log-link/4102/8). The key piece of insight is that probabilities have to be between 0 and 1. If you have some linear function `y = a + x * b`, which can take on any real value, then `inv_logit(y)` is always a valid probability, but not `exp(y)`.
+In choosing to implement this model in stan, I found myself a world of hurt, which mostly resulted in pushing the `rethinking` package to its limits. I have never seen so many error messages as I fumbled my way through red words trying to make a log-link function work with a binomial regression (or some other way to restrict the value of $\lambda$ to positive values else break the contraint $0<p<1$). Most of this stems from my lack of understanding around syntax in `stan` but this exercise has convinced me to invest more time to learn it properly and write models directly in stan. That said, `rethinking` is an excellent framework in which to learn and play around with Bayesian models.  
 
-For this reason, I explored a more conventional approach using the `logit` link function where our linear function is framed around the log odds ratio $\ln(\frac{p}{1-p})$. I ended up with a pretty similar model. 
+All this pain taught me that binomial probabilities have to be between 0 and 1 and if you have some linear function `y = a + x * b`, which can take on any real value, then `1 - exp(-y)` is only bounded by 0 and 1 when y is positive, which is why we use the log-link function to restrict `y` (i.e. `exp(y) > 0`). More conventionally, linear functions are converted to valid probabilities using the logit-link (i.e. `logit(y) = 1/(1 + y) > 0`. 
 
-$$p_{i,j} = \frac{1}{1 - exp(-y_{i,j})}$$ 
+I explored this more conventional approach by using the `logit` link function which resulted in our previous linear function becoming framed around the log odds ratio $\ln(\frac{p}{1-p})$. I ended up with a pretty similar model. 
+
+$$p_{i,j} = \frac{1}{1 + exp(-y_{i,j})}$$ 
 where
 
-$$y_{i,j} = a + f(s_j) + g(e_i) + d \log(f_i) + \textrm{obs}_i$$
-and the variables are defined as before, with the exception that $h(f_i) = d \log(f_i)$.
+$$y_{i,j} = a + b.s_j + c.e_i + \log(f_i) + \textrm{obs}_i$$
+and the variables are defined as before.
 
 Expressing the equation in terms of the odds ratio helps interpretabilty. 
 
-$$\frac{p}{1-p} = exp(a + f(s_j) + g(e_i) + \textrm{obs}_i)f_i^d$$
+$$\frac{p}{1-p} = exp(a + b.s_j + c.e_i + \textrm{obs}_i)f_i$$
 
-The odds of detection (rather than probability) scales with survey effort to the power of d.
-
-Reasonable initial values are less important in this model as the logit function properly restricts fitted probabilities to between 0 and 1.
+The odds of detection scales linearly with survey effort.
 
 ```{r, echo=F}
 load('data/detection_prob/m2.Rdata')
@@ -198,11 +209,10 @@ load('data/detection_prob/m2.Rdata')
 m2 <- rethinking::map2stan(
   alist(
     detection ~ dbinom( 1 , p ),
-    logit(p) <-  a + b*egg_size_c + c*experience + d*log_search_effort_h_ha + obs[participant]  ,
+    logit(p) <-  a + b*egg_size_c + c*experience + log_search_effort_h_ha + obs[participant]  ,
     a ~ dnorm(0, 10),
     b ~ dnorm(0, 10),
     c ~ dnorm(0, 10),
-    d ~ dnorm(0, 10),
     obs[participant] ~ dnorm(0, sigma) ,
     sigma ~ dcauchy(0,1)
   ),
@@ -212,16 +222,20 @@ m2 <- rethinking::map2stan(
 save(m2, file = 'data/detection_prob/m2.Rdata')
 ```
 
+Interestingly, model coefficients are similar despite the different link function.
 
 ```{r}
 # summarise model 
 precis(m2)
+```
 
+
+```{r, fig.width=8, fig.height=8}
 # plot detection probability vs effort
 pars = precis(m2)@output$Mean
 names(pars) = rownames(precis(m2)@output)
 obs = precis(m2, depth = 2)@output$Mean[4:16]
-pred_line =  expand.grid(search_effort_h_ha = seq(0, 10, length = 100),
+pred_line =  expand.grid(search_effort_h_ha = 10^seq(-1, 1, length = 100),
                          egg_size = c(60.5),
                          experience = 0:1,
                          participant = 1) %>% # participant place holder
@@ -236,8 +250,8 @@ pred_line[,c('lower','upper')] <- t((apply( mu , 2 , PI, prob = 0.89 )))
 
 # predictions for each participant with random effect (at mean egg size) 
 d = d %>%
-  mutate(pred = (inv_logit(pars['a'] + pars['b']*0 + pars['c']*(experience=='yes') + pars['d']*log(search_effort_h_ha) + obs[participant])))
-ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
+  mutate(pred = (inv_logit(pars['a'] + pars['b']*0 + pars['c']*(experience=='yes') +log(search_effort_h_ha) + obs[participant])))
+p2 = ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
   geom_line(aes(linetype = factor(experience))) +
   geom_line(aes(y=lower, linetype = factor(experience))) +
   geom_line(aes(y=upper, linetype = factor(experience))) +
@@ -246,13 +260,26 @@ ggplot(pred_line, aes(search_effort_h_ha, pred, colour = factor(experience))) +
   geom_point(data = d, aes(y = percent_detected/100), colour = 'white') +
   ylab('predicted detection probability') +
   xlab('search effort, h/ha') +
+  guides(fill=F, colour = F, linetype = F) + 
+  ggtitle('Model 2') +
   mydarktheme
+
+cowplot::plot_grid( p1 , p1 + ggtitle('') + scale_x_log10(),
+                    p2 , p2 + ggtitle('') + scale_x_log10(), ncol=2)
 
 ```
 
-**Figure 2.** Plot of model 2 predicted detection probability as a function of search effort. Filled circles show observed detected percentages by each participant, while hollow circles show predicted probabilities for each observer’s measured effort level and fitted random effect (egg size is set to mean). Shaded regions shows 89% credible interval.
+**Figure 2.** Plot of model 2 predicted detection probability as a function of search effort. Filled circles show observed detected percentages by each participant, while hollow circles show predicted probabilities for each observer’s measured effort level and fitted random effect (egg size is set to mean). Shaded regions shows 89% credible interval. Prediction for experienced individuals shown with blue (vs red for not-experienced).
 
-Look at that sweet convergence. 
+The DIC of model 2 is lower than model 1. 
+
+```{r}
+DIC(m1)[1]
+```
+
+```{r}
+DIC(m2)[1]
+```
 
 ```{r, eval=FALSE, echo=FALSE}
 # This keeps crashing for some reason
