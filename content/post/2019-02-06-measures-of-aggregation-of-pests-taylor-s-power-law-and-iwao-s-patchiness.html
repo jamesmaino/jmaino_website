@@ -1,0 +1,204 @@
+---
+title: Aggregation measures for pests - Taylor's power law and Iwao's patchiness
+author: James Maino
+date: '2019-02-06'
+slug: measures-of-aggregation-of-pests-taylor-s-power-law-and-iwao-s-patchiness
+categories: []
+tags:
+  - ecology
+  - biosecurity
+  - monitorring
+  - population
+  - R
+header:
+  caption: 'Aggregation measures in pest surveillance'
+  image: '20181229_175359.jpg'
+---
+
+
+
+<p>Aggregation measures for pest abundance have been widely used as summary statistics for aggregation levels as well as in designing surveillance protocols. Taylor’s power law and Iwao’s patchiness are two methods that are used most commonly. To be frank, I find the measures a little strange, particularly when they appear in papers as “cookbook statistics” (sometimes incorrectly presented) with little reference to any underpinning theory. But I managed to find some useful sources which helped to clarrify things for me.</p>
+<p>Basically, these measures of aggregation apply in any case abundances are being measured through space at multiple time points. These aggregation measures are looking for patterns in the relationship between the variance of abundance and the mean, which is why multiple time points (or sampling units) spanning a range of abundances and variances are required for model fitting.</p>
+<p>For illustrative purpose I am going to use a Poisson distributed random variable to simulate some abundances (abundances are frequently assumed to follow <a href="/post/generating-probability-distribution-with-natural-examples">Poisson distributions</a>).</p>
+<p>So say we have n = 1000 measured insect abundances.</p>
+<pre class="r"><code>library(ggplot2)</code></pre>
+<pre class="r"><code>n = 1000
+lambda = 10
+X = rpois(n, lambda)
+head(X)</code></pre>
+<pre><code>## [1] 11  8  7 12 10 10</code></pre>
+<p>The mean of these measured abundances is equal to <span class="math inline">\(\lambda\)</span> (lambda) = 10 and is approximated by the sample mean.</p>
+<pre class="r"><code>mean(X)</code></pre>
+<pre><code>## [1] 10.069</code></pre>
+<p>And the variance is also equal to <span class="math inline">\(\lambda\)</span> = 10.</p>
+<pre class="r"><code>var(X)</code></pre>
+<pre><code>## [1] 9.645885</code></pre>
+<p>We can take the mean and variance of another 1000 measured abundances for each of the values of lambda spanning 1 to 100.</p>
+<pre class="r"><code>n = 100
+d = data.frame(mu = rep(0, n), va = rep(0, n))
+for(i in 1:n){
+  X = rpois(n = n, lambda = i)
+  d$mu[i] = mean(X)
+  d$va[i] = var(X)
+}
+head(d)</code></pre>
+<pre><code>##     mu        va
+## 1 1.00 0.8080808
+## 2 1.79 2.1473737
+## 3 3.31 2.5190909
+## 4 4.04 3.7559596
+## 5 4.97 5.1001010
+## 6 5.71 6.0867677</code></pre>
+<p>And plot the results on normal and log axes.</p>
+<pre class="r"><code>p1 = ggplot(d, aes(mu, va)) + 
+  geom_point(col = &#39;red&#39;) + 
+  geom_smooth(method = &#39;lm&#39;) + 
+  mydarktheme
+cowplot::plot_grid(p1, p1 + scale_x_log10() + scale_y_log10()) </code></pre>
+<p><img src="/post/2019-02-06-measures-of-aggregation-of-pests-taylor-s-power-law-and-iwao-s-patchiness_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
+<p>As we expect, variance scales proportionally to the mean with a slope equal to 1.</p>
+<pre class="r"><code>m1 = lm(va ~ mu, data = d)
+coef(m1)</code></pre>
+<pre><code>## (Intercept)          mu 
+##  -0.1677127   1.0022452</code></pre>
+<p>Now let’s try modifying the Poisson variable <span class="math inline">\(X\)</span> by raising it to an exponent <span class="math inline">\(X^2\)</span>. This kind of density dependence might occur when the growth rate of a population accelerates with the size of the population, or if larger populations attract immigrating individuals.</p>
+<pre class="r"><code>n = 100
+d = data.frame(mu = rep(0, n), va = rep(0, n))
+expo = 2
+for(i in 1:n){
+  X = rpois(n = n, lambda = i)
+  X = X^expo
+  d$mu[i] = mean(X)
+  d$va[i] = var(X)
+}
+head(d)</code></pre>
+<pre><code>##      mu        va
+## 1  2.62  11.59152
+## 2  5.51  42.77768
+## 3 11.01 121.52515
+## 4 18.74 316.80040
+## 5 28.31 421.22616
+## 6 42.49 939.52515</code></pre>
+<p>If we plot this as before, we find that the sample variance of abundance is now scaling faster than the mean. This means that we can no longer fit a straight line to the data. However, the logarithmic plot shows that a log transformation of both variables will linearise the data.</p>
+<pre class="r"><code>p1 = ggplot(d, aes(mu, va)) + 
+  geom_point(col=&#39;red&#39;) + 
+  geom_smooth(method = &#39;lm&#39;) + 
+  mydarktheme
+cowplot::plot_grid(p1, p1 + scale_x_log10() + scale_y_log10())</code></pre>
+<p><img src="/post/2019-02-06-measures-of-aggregation-of-pests-taylor-s-power-law-and-iwao-s-patchiness_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<p>But what does the slope mean now?</p>
+<pre class="r"><code>m1 = lm(log(va) ~ log(mu), data = d)
+coef(m1)</code></pre>
+<pre><code>## (Intercept)     log(mu) 
+##    1.183677    1.526393</code></pre>
+<p>Time for some algebra. We have essentially fit the equation <span class="math inline">\(\ln s^2 = a + b\ln \bar \mu\)</span> where <span class="math inline">\(a\)</span> is the intercept and <span class="math inline">\(b\)</span> is the slope. This can be arranged as follows</p>
+<p><span class="math display">\[\ln s^2 = a + b\ln \bar\mu \]</span>
+<span class="math display">\[\ln s^2 =  \ln (e^a\bar\mu^b) \]</span></p>
+<div id="taylors-power-law" class="section level2">
+<h2>Taylor’s power law</h2>
+<p><span class="math display">\[s^2 =  \dot a\bar\mu^b \]</span>
+This is Taylor’s power law<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. When <span class="math inline">\(b = 1\)</span>, aggregation is random. When <span class="math inline">\(b &lt; 1\)</span>, abundance is more uniform that expected based on the mean. When <span class="math inline">\(b&gt;1\)</span>, abundance is more variable than expected.</p>
+<p>Note the <span class="math inline">\(\dot a = e^a\)</span>. I have seen papers where the fitted exponent is not exponentiated an thus reported incorrectly. When I first saw the estimate of 1.5 for the slope coefficient I suspected that there may be a simple analytical solution for it, i.e. if <span class="math inline">\(X \sim Pois(\lambda)\)</span> what is <span class="math inline">\(E(X^2)\)</span> and <span class="math inline">\(Var(X^2)\)</span>. I was kind of right. The short answer is that the slope will be <span class="math inline">\((n+1)/n\)</span> where <span class="math inline">\(n\)</span> is the power exponent for values of <span class="math inline">\(n&gt;1\)</span>; the slope will approach zero as <span class="math inline">\(n \to 1/2\)</span> for <span class="math inline">\(\lambda &gt;&gt; 1\)</span>. The long answer is at the end of this post.</p>
+</div>
+<div id="iwaos-patchiness" class="section level2">
+<h2>Iwao’s patchiness</h2>
+<p>Like Taylor’s power law, Iwao’s patchiness method defines a relationship between mean abundance and variance <a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. Here we start with the null expectation that mean abundance will equal variance when aggregation is random. Thus, if abundances are random, we can say:
+<span class="math display">\[s^2 = \bar\mu\]</span>
+<span class="math display">\[\frac{s^2}{\bar\mu} - 1 = 0\]</span>
+<span class="math display">\[\bar\mu + (\frac{s^2}{\bar\mu} - 1) = \bar\mu\]</span>
+The LHS of the equation is defined as “mean crowding”, or the amount by which the ratio of variance to mean density exceeds unity, added to the mean density itself <a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>.</p>
+<p><span class="math display">\[\dot\mu = \bar\mu + (\frac{s^2}{\bar\mu} - 1)\]</span></p>
+<pre class="r"><code>n = 100
+d = data.frame(mu = rep(0, n), va = rep(0, n), crowd = rep(0, n))
+expo = 0.9
+for(i in 1:n){
+  X = rpois(n, lambda = i)
+  X = X^expo
+  d$mu[i] = mean(X)
+  d$va[i] = var(X)
+  d$crowd[i] = d$mu[i] + d$va[i]/d$mu[i] - 1
+}
+head(d)</code></pre>
+<pre class="r"><code>d$crowd = d$mu + d$va/d$mu - 1
+
+ggplot(d, aes(mu, crowd)) + 
+  geom_point(col=&#39;red&#39;) + 
+  geom_smooth(method = &#39;lm&#39;) + 
+  mydarktheme</code></pre>
+<p><img src="/post/2019-02-06-measures-of-aggregation-of-pests-taylor-s-power-law-and-iwao-s-patchiness_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>I don’t really see a logical reason why you would add the intercept in the regression equation, but people usually do. However, some research have made the case for regressing crowding against abundance without an intercept <a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>. The important thing to note is that the slope estimate is different to Taylor’s exponent, although the direction of the relationship remains the same, i.e. <span class="math inline">\(b=1\)</span> for random aggregations, <span class="math inline">\(b&lt;1\)</span> for more homogeneous aggregations (low variance), and <span class="math inline">\(b&gt;1\)</span> for greater clustering (higher variance that expected based on mean).</p>
+<pre class="r"><code>m1 = lm(crowd ~ mu - 1, data = d)
+coef(m1)</code></pre>
+<pre><code>##       mu 
+## 1.049886</code></pre>
+</div>
+<div id="extra-things" class="section level2">
+<h2>Extra things</h2>
+<p>The negative binomial distribution can be related to both Taylor’s law and Iwao’s patchiness through it’s parameter <span class="math inline">\(k\)</span>, which is useful if you want to simulate data that has a desired variance and mean. But be wary that different generating processes can produce the same point estimates <a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>.</p>
+<p><span class="math display">\[\sigma^2 = \bar\mu + \bar\mu^2/k\]</span></p>
+<p><span class="math display">\[\dot\mu  = \bar\mu + \bar\mu/k\]</span></p>
+<p>So why did the squarred Poisson variable produce a Taylor exponent of 1.5?</p>
+<p>Turns out the expected value of a Poisson random variable raised to the power of <span class="math inline">\(n\)</span> can be expressed as:</p>
+<p><span class="math display">\[E(X^2) = \lambda + \lambda^2\]</span>
+<span class="math display">\[E(X^3) = \lambda + 3\lambda^2 + \lambda^3\]</span>
+<span class="math display">\[E(X^4) = \lambda + 7\lambda^2 + 6\lambda^3 + \lambda^4\]</span>
+More generally, the coefficient of <span class="math inline">\(\lambda^k\)</span> in the expansion <span class="math inline">\(E(X^n)\)</span> is <a href="https://math.stackexchange.com/questions/115303/if-x-is-a-poisson-distribution-with-mean-lambda-how-is-x2-distributed">the number of unordered partitions of a set of size <span class="math inline">\(n\)</span> into <span class="math inline">\(k\)</span> parts, i.e. a stirling number of the second kind</a>.</p>
+<p>Variance is given by the formula:
+<span class="math display">\[Var(X) = E(X^2) - E(X)^2\]</span>
+So:</p>
+<p><span class="math display">\[Var(X^2) = E(X^4) - E(X^2)^2\]</span>
+which, <a href="https://math.stackexchange.com/questions/1294115/if-x-has-a-poisson-distribution-with-ex-lambda-does-varx2-4-lambda3">with some algebra</a>, yields:</p>
+<p><span class="math display">\[Var(X^2) = 4\lambda^3+6\lambda^2+\lambda\]</span>
+We can see here that <span class="math inline">\(\ln E(X^2) \approx 2 \ln\lambda\)</span> for <span class="math inline">\(\lambda &gt;&gt; 1\)</span> as the terms with the higher exponent tend to dominate the RHS. Likewise, <span class="math inline">\(\ln Var(X^2) \approx 3 \ln\lambda + \ln 4\)</span>. Thus,</p>
+<p><span class="math display">\[\ln Var(X^2) \approx 3/2 \ln E(X^2) + \ln 4)\]</span></p>
+<p>which explains the estimated coefficients. This can be generalised to higher values of <span class="math inline">\(n\)</span>.</p>
+<pre class="r"><code>m1 = lm(log(va) ~ log(mu), data = d)
+coef(m1)</code></pre>
+<pre><code>## (Intercept)     log(mu) 
+##    1.183677    1.526393</code></pre>
+<p>According to <a href="https://en.wikipedia.org/wiki/Poisson_distribution">wikipedia</a>, variance of <span class="math inline">\(X^k\)</span> stabilises as <span class="math inline">\(k \to 0.5\)</span> for <span class="math inline">\(\lambda &gt;&gt; 1\)</span>.</p>
+<p>For some fun, we can define the stirling function as below which was reproduced from <a href="http://r.789695.n4.nabble.com/Stirling-numbers-td804241.html">this thread</a>.</p>
+<pre class="r"><code>Stirling2 &lt;- function(n,m) 
+{ 
+  ## Purpose:  Stirling Numbers of the 2-nd kind 
+  ## S^{(m)}_n = number of ways of partitioning a set of 
+  ##                      $n$ elements into $m$ non-empty subsets 
+  ## Author: Martin Maechler, Date:  May 28 1992, 23:42 
+  ## ---------------------------------------------------------------- 
+  ## Abramowitz/Stegun: 24,1,4 (p. 824-5 ; Table 24.4, p.835) 
+  ## Closed Form : p.824 &quot;C.&quot; 
+  ## ---------------------------------------------------------------- 
+  
+  if (0 &gt; m || m &gt; n) stop(&quot;&#39;m&#39; must be in 0..n !&quot;) 
+  k &lt;- 0:m 
+  sig &lt;- rep(c(1,-1)*(-1)^m, length= m+1)# 1 for m=0; -1 1 (m=1) 
+  ## The following gives rounding errors for (25,5) : 
+  ## r &lt;- sum( sig * k^n /(gamma(k+1)*gamma(m+1-k)) ) 
+  ga &lt;- gamma(k+1) 
+  round(sum( sig * k^n /(ga * rev(ga)))) 
+} </code></pre>
+<p>From here we can define a function for the expected value of a power-Poisson variable.</p>
+<pre class="r"><code>mu_poispower = function(moment = 2, lambda = 10) {
+  sum = 0
+  for (i in 1:moment) sum = sum + Stirling2(moment, i) * lambda^i
+  sum
+}
+mu_poispower(1, 10)</code></pre>
+<pre><code>## [1] 10</code></pre>
+<p>Thus, using the the previous function we can define a function for variance.</p>
+<pre class="r"><code>var_poispower = function(moment = 2, lambda = 10) {
+  mu_poispower(moment * 2, lambda) - mu_poispower(moment, lambda)^2
+}
+var_poispower(3, 10)</code></pre>
+<pre><code>## [1] 1527010</code></pre>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Clark SJ, Perry JN (1994) Small sample estimation for Taylor’s power law. Environ Ecol Stat 1:287–302. doi: 10.1007/BF00469426<a href="#fnref1" class="footnote-back">↩</a></p></li>
+<li id="fn2"><p>Lloyd M (1967) Mean Crowding, Journal of Animal Ecology<a href="#fnref2" class="footnote-back">↩</a></p></li>
+<li id="fn3"><p>Lloyd M (1967) Mean Crowding, Journal of Animal Ecology<a href="#fnref3" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>Waters EK, Furlong MJ, Benke KK, et al (2014) Iwao’s patchiness regression through the origin: biological importance and efficiency of sampling applications. Popul Ecol 56:393–399. doi: 10.1007/s10144-013-0417-y<a href="#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn5"><p>Clark SJ, Perry JN (1994) Small sample estimation for Taylor’s power law. Environ Ecol Stat 1:287–302. doi: 10.1007/BF00469426<a href="#fnref5" class="footnote-back">↩</a></p></li>
+</ol>
+</div>
