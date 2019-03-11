@@ -1,0 +1,68 @@
+---
+title: Australian seasonality of fruit and vegetables
+author: ~
+date: '2019-03-11'
+slug: australian-horticulture-seasonality
+categories: []
+tags: ["", "population", "exponential"]
+header:
+  caption: ''
+  image: ''
+---
+
+```{r, echo=F, message=F,warning=F}
+library('tidyverse')
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+source('data/useful_scripts/mydarktheme.R')
+```
+
+As pest scientists, it is important to understand how crop seasonality overlaps with pest seasonality.  
+
+But vegetable and fruit seasonality in Australia is important for a few other reasons. In season produce is cheaper, fresher,  with a lower carbon footprint, compared with imported produce, due to increased local availability. In addition, different areas in Australia have different fruit production outputs e.g. high melon production in New South Wales but not in Victoria, so it is important to now what is grown near you.
+
+So the aim here is to visualise what the "best" fruit and vegetable is to buy depending on what month it is and which Australian state you live in. 
+
+The first step is to start with data, which I compiled from the fruit and vegetable [Horticulture   Australia Statistics Handbooks](https://www.horticulture.com.au/growers/help-your-business-grow/research-reports-publications-fact-sheets-and-more/australian-horticulture-statistics-handbook/). The publications list rough estimates of production levels (none, low, medium, high) for each commodity for each state, for each month. That's a few dimensions, so here I'll try and display the data succinctly. 
+
+First I load and shape the data.
+
+```{r}
+d = read_csv('data/crops/CommoditySeasonalityHortHandbook16_17.csv') %>% 
+  gather(Month, Production, -Commodity, -State) %>% 
+  mutate(Month = as.Date(paste('01', Month, '2017'), format = '%d %b %Y')) %>% 
+  mutate(Commodity = factor(Commodity, levels = rev(unique(Commodity)))) %>%
+  filter(Production != 'None') %>%
+  mutate(Production = factor(Production, levels = c('Low','Medium','High')))
+head(d)
+```
+Next, I want to sort produce by season, so that in-season produce are closer together. 
+
+```{r}
+season_start = d %>% 
+  group_by(State, Commodity) %>%
+  filter(Production == 'High') %>%
+  summarise(start = min(Month))
+d = left_join(d, season_start)
+```
+
+Finally, I loop through each state and plot the production level for each crop in each month.
+
+```{r, fig.height=10, fig.width=7}
+for (istate in unique(d$State)) {
+  cat(istate)
+  p = ggplot(d %>% filter(State == istate) %>% 
+               mutate(Commodity = factor(Commodity, levels = unique(Commodity[order(start)]))))  +
+    geom_line(aes(Month, Commodity, size = Production, colour = Production, group = Commodity)) + 
+    scale_color_manual(values = c('#db0606', '#e8933a','#87e504'))+
+    scale_size_manual(values = c(1,2,3)) + 
+    scale_x_date(date_labels = '%b', date_breaks = '1 month') + 
+    mydarktheme + 
+    theme(panel.grid.minor.x = element_blank(),
+          panel.grid.major.x = element_blank()) +
+    ggtitle(istate) + 
+    xlab('') + ylab('')
+  print(p)
+}
+```
+
+

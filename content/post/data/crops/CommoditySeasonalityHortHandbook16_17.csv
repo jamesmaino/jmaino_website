@@ -1,0 +1,370 @@
+Commodity,State,Jul,Aug,Sep,Oct,Nov,Dec,Jan,Feb,Mar,Apr,May,Jun
+Apples,New South Wales,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,High,High,Medium,Medium
+Apples,Victoria,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,High,High,Medium,Medium
+Apples,Queensland,Medium,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,High,High,Medium
+Apples,Western Australia,Medium,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,High,High,Medium
+Apples,South Australia,Medium,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,High,High,Medium
+Apples,Tasmania,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,High,High,Medium,Medium
+Apples,Imported,None,Low,Low,Low,Low,Low,Low,Low,Low,None,None,None
+Avocado,Queensland,Medium,Low,Low,None,None,None,None,None,High,High,High,High
+Avocado,Western Australia,Low,Medium,High,High,High,High,Medium,Medium,Low,None,None,None
+Avocado,New South Wales,Low,Medium,Medium,Low,None,None,None,None,None,None,None,None
+Avocado,Victoria,Low,Medium,Medium,Low,None,None,None,None,None,None,None,None
+Avocado,South Australia,Low,Medium,Medium,Low,None,None,None,None,None,None,None,None
+Avocado,Imported,None,Low,Medium,Medium,Medium,Medium,Medium,Medium,Low,None,None,None
+Bananas,Queensland,High,High,High,High,High,Medium,Medium,Medium,High,High,High,High
+Bananas,Western Australia,High,High,High,High,Medium,Medium,Medium,Medium,Medium,High,High,High
+Bananas,Northern Territory,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,Medium,High
+Bananas,New South Wales,High,Medium,Medium,Medium,Medium,Low,Low,Medium,Medium,Medium,Medium,High
+Blueberries,New South Wales,High,High,High,High,High,High,High,Medium,Low,None,None,Medium
+Blueberries,Queensland,None,None,None,None,None,Low,Low,Low,Low,None,None,None
+Blueberries,Tasmania,None,None,None,None,None,None,High,High,High,Medium,None,None
+Blueberries,Victoria,None,None,None,None,None,Medium,High,High,High,Medium,None,None
+Blueberries,South Australia,None,None,None,None,None,Medium,High,High,Medium,Medium,Low,None
+Blueberries,Imported,None,None,None,None,None,Medium,High,High,High,Medium,None,None
+Rubus,New South Wales,High,High,High,Medium,Low,Low,Low,Low,Medium,High,High,High
+Rubus,Victoria,None,None,None,Low,High,High,High,High,Medium,Low,None,None
+Rubus,Queensland,High,High,High,Medium,Low,None,None,None,Low,Medium,High,High
+Rubus,Western Australia,None,None,None,Low,Medium,Medium,Medium,Medium,Low,None,None,None
+Rubus,South Australia,None,None,None,Low,Medium,Medium,Medium,Medium,Low,None,None,None
+Rubus,Tasmania,None,None,None,None,Low,High,High,High,High,Low,Low,None
+Strawberries,Victoria,None,None,None,Medium,High,High,High,High,High,Medium,Low,Low
+Strawberries,Queensland,High,High,Medium,Low,Low,None,None,None,None,None,Low,Medium
+Strawberries,Western Australia,High,High,High,Medium,Medium,Low,None,None,None,None,None,Medium
+Strawberries,South Australia,None,Low,Low,Medium,High,High,High,High,High,Medium,Low,Low
+Strawberries,Tasmania,None,None,None,Low,Medium,High,High,Medium,Low,Low,None,None
+Strawberries,New South Wales,None,None,None,Low,Medium,High,High,Medium,Low,Low,None,None
+Strawberries,Victoria,None,None,None,None,Medium,High,High,Medium,None,None,None,None
+Strawberries,New South Wales,None,None,None,Low,High,High,Medium,None,None,None,None,None
+Strawberries,Tasmania,None,None,None,None,None,Low,High,Medium,None,None,None,None
+Strawberries,South Australia,None,None,None,Low,High,High,Medium,None,None,None,None,None
+Strawberries,Western Australia,None,None,None,None,Low,Medium,High,Low,None,None,None,None
+Strawberries,Queensland,None,None,None,Low,Medium,High,High,Low,None,None,None,None
+Strawberries,Imported,High,None,None,None,None,None,None,None,None,None,Medium,High
+Grapefruit,New South Wales,High,High,Medium,Low,Low,Low,None,Low,Low,Low,Low,Medium
+Grapefruit,Victoria,High,Medium,Medium,Low,Low,Low,None,Low,Low,Medium,Medium,High
+Grapefruit,Queensland,Medium,High,High,Medium,Low,None,None,None,Low,Low,Medium,Medium
+Grapefruit,Western Australia,Medium,Medium,Low,Low,Low,Low,None,Low,Low,Low,Medium,Medium
+Grapefruit,South Australia,High,High,Medium,Medium,Low,Low,None,Low,Low,Medium,Medium,High
+Grapefruit,Northern Territory,Low,Low,Low,Low,Low,Low,None,Low,Low,Low,Low,Low
+Grapefruit,Imported,None,None,None,None,Low,Medium,Medium,Low,Low,None,None,None
+Lemons/Limes,New South Wales,High,High,Medium,Low,None,None,Low,Low,Medium,Medium,High,High
+Lemons/Limes,Victoria,Low,Medium,Medium,Low,None,None,None,None,None,None,None,Low
+Lemons/Limes,Queensland,High,High,Medium,Low,None,None,Low,Low,Medium,Medium,Medium,High
+Lemons/Limes,Western Australia,High,Medium,Low,Low,None,None,Low,Low,Low,Low,Medium,Medium
+Lemons/Limes,South Australia,None,Low,Medium,Medium,Low,None,None,None,None,None,None,None
+Lemons/Limes,Northern Territory,Medium,Medium,Medium,Low,None,None,None,None,Low,Low,Medium,Medium
+Lemons/Limes,Imported,None,Low,Medium,Medium,High,High,High,Medium,Low,None,None,None
+Mandarins,New South Wales,Medium,High,High,Low,None,None,None,None,Low,Low,Low,Medium
+Mandarins,Victoria,High,High,Low,None,None,None,None,None,Low,Low,Low,Medium
+Mandarins,Queensland,High,High,Medium,Low,None,None,None,None,Low,Low,Medium,High
+Mandarins,Western Australia,High,Medium,Low,Low,None,None,None,None,Low,Low,Low,Medium
+Mandarins,South Australia,High,High,Low,None,None,None,None,None,Low,Low,Low,Medium
+Mandarins,Imported,None,None,None,None,None,Low,Low,Medium,Low,None,None,None
+Oranges,New South Wales,Medium,High,High,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,Medium
+Oranges,Victoria,Medium,High,High,Medium,Low,Medium,None,None,None,None,Low,Low
+Oranges,Queensland,Low,Low,Low,Low,Low,Low,None,None,None,Low,Low,Low
+Oranges,Western Australia,Medium,High,Medium,Low,Low,None,None,None,None,None,Low,Medium
+Oranges,South Australia,Medium,Medium,High,Low,Low,None,None,None,None,None,Low,Medium
+Oranges,Imported,None,None,None,None,Low,Medium,Medium,High,Medium,Low,Low,None
+Custard apple,New South Wales,Medium,Low,Low,Low,None,None,None,None,None,Low,Low,Medium
+Custard apple,Queensland,Medium,Medium,Low,None,None,None,Low,Low,Medium,Medium,Medium,Medium
+Kiwi fruit,New South Wales,Low,None,None,None,None,None,None,None,Medium,Medium,Low,Low
+Kiwi fruit,Victoria,Low,Low,None,None,None,None,None,None,None,High,High,Medium
+Kiwi fruit,Queensland,Low,None,None,None,None,None,None,None,Medium,Medium,Low,Low
+Kiwi fruit,South Australia,Low,None,None,None,None,None,None,None,None,None,Low,Low
+Kiwi fruit,Imported,High,Medium,Medium,High,Medium,Medium,Low,Low,Low,Low,Low,Low
+Lychee,New South Wales,None,None,None,None,None,None,Low,Medium,High,None,None,None
+Lychee,Queensland,None,None,None,Low,Medium,High,High,High,Low,None,None,None
+Lychee,New South Wales,None,None,None,None,None,None,Low,Medium,None,None,None,None
+Lychee,Victoria,None,None,None,None,None,None,None,Low,Medium,None,None,None
+Lychee,Queensland,None,None,None,None,High,High,High,Medium,Low,None,None,None
+Lychee,Western Australia,None,None,None,High,High,High,Low,Low,None,None,None,None
+Lychee,Northern Territory,None,Low,Low,High,High,High,None,None,None,None,None,None
+Lychee,Imported,Low,Low,None,None,None,None,None,None,None,Low,Low,Low
+Musk melons,New South Wales,None,None,None,None,None,None,Medium,High,High,Medium,None,None
+Musk melons,Victoria,None,None,None,None,None,None,Low,Medium,Low,Low,None,None
+Musk melons,Queensland,None,Low,Medium,Medium,High,Medium,Low,Low,None,Low,Low,None
+Musk melons,Western Australia,Medium,High,High,Low,None,None,None,None,None,None,Low,Medium
+Musk melons,South Australia,None,None,None,None,None,None,Low,Low,Low,Low,None,None
+Musk melons,Northern Territory,High,High,Medium,Low,Low,Low,None,None,None,Low,Low,Medium
+Watermelon,New South Wales,None,None,None,None,None,None,High,High,Medium,Low,None,None
+Watermelon,Victoria,None,None,None,None,Low,Low,High,Medium,Medium,Low,None,None
+Watermelon,Queensland,Low,Low,Low,Low,Medium,High,High,High,Medium,Medium,Medium,Low
+Watermelon,Western Australia,Low,Low,Low,Low,Low,None,None,None,None,None,Low,Low
+Watermelon,South Australia,None,None,None,None,Low,Low,High,Medium,Medium,Low,None,None
+Watermelon,Northern Territory,Medium,Low,Low,Low,Medium,None,None,None,None,None,Low,Medium
+Nashi,New South Wales,Medium,Medium,Medium,Low,Low,None,None,None,Low,Low,Medium,Medium
+Nashi,Victoria,Medium,Medium,Medium,Medium,Low,None,None,None,Low,Low,Medium,Medium
+Nashi,Queensland,Medium,Medium,Medium,Low,Low,None,None,None,Low,Medium,Medium,Medium
+Nashi,Western Australia,Medium,Low,Low,None,None,None,None,None,None,None,Medium,Medium
+Passionfruit,New South Wales,Medium,Low,Low,Low,Low,Low,Medium,Medium,Medium,Medium,Medium,Medium
+Passionfruit,Victoria,Low,Low,None,None,None,Low,Low,Low,Low,Low,Low,Low
+Passionfruit,Queensland,Medium,Low,Low,Low,Medium,High,High,Medium,Medium,Medium,Medium,Medium
+Passionfruit,Western Australia,Low,Low,None,None,None,None,None,None,None,Low,Low,Low
+Passionfruit,South Australia,Low,Low,None,None,None,None,None,None,None,None,Low,Low
+Passionfruit,Northern Territory,Low,Low,None,None,None,None,None,None,None,None,Low,Low
+Papaya,Queensland,Medium,Medium,Medium,Low,Low,Low,Low,Low,Medium,Medium,High,High
+Papaya,Western Australia,Low,None,None,None,None,None,Low,Low,Low,Low,Low,Low
+Papaya,Northern Territory,Low,None,None,None,None,None,Low,Low,Low,Low,Low,Low
+Papaya,Imported,Low,Low,Low,Low,Low,Low,Low,None,Low,Low,Low,Low
+Pears,New South Wales,Low,Low,Low,Low,None,None,None,Medium,Medium,Medium,Low,Low
+Pears,Victoria,Medium,Medium,Medium,Medium,Medium,Medium,Low,High,High,High,High,Medium
+Pears,Queensland,Low,Low,Low,Low,None,None,None,Medium,Medium,Medium,Low,Low
+Pears,Western Australia,Low,Low,Low,Low,Low,None,None,High,High,Medium,Medium,Medium
+Pears,South Australia,Low,Low,Low,Low,None,None,None,None,Medium,Medium,Medium,Low
+Pears,Tasmania,Low,Low,Low,None,None,None,None,None,None,Medium,Medium,Medium
+Pears,Imported,None,None,None,Low,Medium,High,Medium,Low,Low,Low,None,None
+Persimmons,New South Wales,None,None,None,None,None,None,None,None,Low,Medium,Medium,Low
+Persimmons,Victoria,None,None,None,None,None,None,None,None,Low,Medium,Medium,Low
+Persimmons,Queensland,None,None,None,None,None,None,None,Low,High,Medium,Low,None
+Persimmons,Western Australia,None,None,None,None,None,None,None,None,Low,Low,Low,Low
+Persimmons,South Australia,None,None,None,None,None,None,None,None,Low,Medium,Low,None
+Persimmons,Imported,Low,Low,Low,Low,Low,None,None,None,None,None,None,Low
+Pineapple,Queensland,Low,Low,Medium,Medium,High,High,High,High,Medium,Low,Low,Low
+Pineapple,Northern Territory,None,None,None,Low,Medium,High,Medium,Low,Low,Low,None,None
+Apricots,New South Wales,None,None,None,None,Low,Medium,High,Medium,None,None,None,None
+Apricots,Victoria,None,None,None,None,Medium,High,High,High,Low,None,None,None
+Apricots,Queensland,None,None,None,None,Low,Medium,Medium,Low,None,None,None,None
+Apricots,Western Australia,None,None,None,None,Low,Medium,High,Low,None,None,None,None
+Apricots,South Australia,None,None,None,None,Medium,High,Medium,Low,None,None,None,None
+Apricots,Tasmania,None,None,None,None,None,Low,Low,Low,None,None,None,None
+Apricots,Imported,Low,Low,None,None,None,None,Low,Low,Low,Low,Low,Low
+Nectarine/Peaches,New South Wales,None,None,None,None,Low,Low,High,Medium,Medium,Low,Low,None
+Nectarine/Peaches,Victoria,None,None,Low,Low,Low,Medium,High,High,Medium,Low,Low,None
+Nectarine/Peaches,Queensland,None,None,Low,Low,Medium,High,High,Medium,Low,None,None,None
+Nectarine/Peaches,Western Australia,None,None,None,Low,Low,Medium,Medium,Low,Low,Low,None,None
+Nectarine/Peaches,South Australia,None,None,None,Low,Low,Medium,Medium,Low,Low,Low,None,None
+Nectarine/Peaches,Tasmania,None,None,None,None,Low,Low,Low,Low,None,None,None,None
+Nectarine/Peaches,Imported,High,Medium,Low,None,None,None,None,None,None,None,Low,Low
+Plums,New South Wales,None,None,None,None,None,Low,Low,Low,Low,Low,None,None
+Plums,Victoria,None,None,None,None,Low,Low,High,High,Medium,Low,Low,None
+Plums,Queensland,None,None,None,None,Low,Medium,Medium,Medium,Low,Low,None,None
+Plums,Western Australia,None,None,None,None,Low,Low,Medium,Medium,Low,Low,None,None
+Plums,South Australia,None,None,None,None,Low,Low,Low,Low,Low,Low,None,None
+Plums,Tasmania,None,None,None,None,None,None,Low,Low,Low,None,None,None
+Plums,Imported,Low,Low,None,None,None,None,None,None,None,None,Low,Low
+Table grapes,New South Wales,None,None,None,None,None,Low,High,Medium,Medium,Medium,Low,None
+Table grapes,Victoria,None,None,None,None,Low,Low,High,High,Medium,Medium,Low,None
+Table grapes,Queensland,None,None,None,None,None,Low,High,Medium,Medium,Medium,Low,None
+Table grapes,Western Australia,None,None,None,None,None,None,Medium,Medium,Medium,Low,Low,None
+Table grapes,South Australia,None,None,None,None,None,None,High,Medium,Medium,Low,Low,None
+Table grapes,Northern Territory,None,None,None,None,None,Low,Medium,Medium,Low,Low,Low,None
+Table grapes,Imported,Low,Medium,Medium,Medium,High,Low,None,None,None,None,None,None
+Dried grapes,New South Wales,None,None,None,None,None,Low,High,Medium,Medium,Medium,Low,None
+Dried grapes,Victoria,None,None,None,None,Low,Low,High,High,Medium,Medium,Low,None
+Dried grapes,Western Australia,None,None,None,None,None,None,Medium,Medium,Medium,Low,Low,None
+Dried grapes,South Australia,None,None,None,None,None,None,High,Medium,Medium,Low,Low,None
+Prunes,New South Wales,None,None,None,None,Low,Low,High,High,Medium,Low,Low,None
+Prunes,Victoria,None,None,None,None,None,Low,Low,Low,Low,Low,None,None
+Dried tree fruit,New South Wales,None,None,None,Low,Low,Medium,Medium,Medium,Medium,Medium,Low,Low
+Dried tree fruit,Victoria,None,None,None,Low,Low,Medium,High,High,High,Medium,Low,Low
+Dried tree fruit,Queensland,None,None,None,Low,Low,Medium,Medium,Medium,Medium,Medium,Medium,Low
+Dried tree fruit,Western Australia,None,None,None,Low,Low,Low,Medium,Medium,Medium,Low,Low,None
+Dried tree fruit,South Australia,None,None,None,Low,Low,Medium,Medium,Medium,Medium,Medium,Low,Low
+Dried tree fruit,Tasmania,None,None,None,Low,Low,Low,Low,Low,Low,Low,Low,None
+Canned fruit,New South Wales,None,None,None,Low,Medium,Medium,Medium,Medium,Medium,Low,Low,None
+Canned fruit,Victoria,None,None,None,Low,Medium,High,High,High,High,Medium,Low,None
+Canned fruit,Queensland,None,None,None,Low,Medium,High,High,High,Medium,Low,Low,None
+Canned fruit,Western Australia,None,None,None,Low,Low,Medium,Medium,Medium,Medium,Medium,Low,None
+Canned fruit,South Australia,None,None,None,Low,Medium,Medium,Medium,Medium,Medium,Medium,Low,None
+Canned fruit,Tasmania,None,None,None,Low,Low,Low,Low,Low,Low,Low,Low,None
+Canned fruit,Northern Territory,None,None,None,None,None,None,Low,Medium,Low,None,None,None
+Olives,New South Wales,None,None,None,None,None,None,None,None,None,Low,Medium,Low
+Olives,Victoria,Medium,None,None,None,None,None,None,None,None,Medium,High,High
+Olives,Queensland,None,None,None,None,None,None,None,None,Low,Low,Low,None
+Olives,Western Australia,None,None,None,None,None,None,None,None,None,Medium,High,Medium
+Olives,South Australia,None,None,None,None,None,None,None,None,None,Low,High,Medium
+Olives,Tasmania,Low,Low,None,None,None,None,None,None,None,None,Low,Low
+Artichokes,New South Wales,Medium,Medium,Low,None,None,None,None,None,None,Low,Medium,Medium
+Artichokes,Victoria,High,Medium,Medium,Low,Low,None,None,Low,Low,Low,Medium,High
+Artichokes,Western Australia,Low,Low,None,None,None,None,None,None,None,Low,Low,Low
+Artichokes,South Australia,Low,Low,Low,None,None,None,None,None,None,None,Low,Low
+Asparagus,New South Wales,Low,Low,Medium,High,Medium,Low,Low,Low,None,None,None,None
+Asparagus,Victoria,None,Low,High,High,High,Medium,Medium,Medium,Medium,Low,None,None
+Asparagus,Western Australia,None,None,Low,Medium,Medium,Low,None,None,None,None,None,None
+Beans,New South Wales,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Medium,High
+Beans,Victoria,Medium,Medium,Medium,Medium,Low,Low,Low,Low,Medium,Medium,Medium,High
+Beans,Queensland,High,High,Medium,Medium,Medium,Low,Low,Medium,Medium,High,High,High
+Beans,Western Australia,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,Medium,Medium
+Beans,South Australia,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Low,Medium,Medium
+Beans,Tasmania,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Medium,Medium,Medium
+Beetroot,New South Wales,High,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,High
+Beetroot,Victoria,Medium,Low,Low,Low,Low,Low,Low,Low,Low,Medium,Medium,High
+Beetroot,Queensland,High,High,Medium,Low,Low,Low,Medium,Medium,Medium,Medium,Medium,High
+Beetroot,Western Australia,Medium,Medium,Low,None,None,None,None,None,None,Low,Medium,Medium
+Broccoli,New South Wales,High,High,High,Medium,Medium,Medium,Low,Low,Medium,Medium,Medium,Medium
+Broccoli,Victoria,Medium,High,High,Medium,Medium,Medium,Medium,Low,Low,Medium,Medium,Medium
+Broccoli,Queensland,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Low,Low,Medium,High
+Broccoli,Western Australia,Low,Medium,High,Medium,Medium,Medium,Medium,Medium,Low,Low,Medium,Medium
+Broccoli,South Australia,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,Medium,Medium
+Broccoli,Tasmania,Medium,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,Medium
+Brussels Sprouts,New South Wales,Low,Low,None,None,None,None,None,None,None,None,None,Low
+Brussels Sprouts,Victoria,High,Medium,None,None,None,None,None,Low,Low,Medium,High,High
+Brussels Sprouts,Queensland,Low,Low,Low,None,None,None,None,None,None,Low,Low,Medium
+Brussels Sprouts,Western Australia,Low,Low,Low,Low,Low,Low,None,None,None,None,None,None
+Brussels Sprouts,South Australia,High,Medium,Medium,None,None,Low,Low,Medium,High,High,High,High
+Brussels Sprouts,Tasmania,Medium,Medium,None,None,None,None,Low,Low,Low,Low,Medium,Medium
+Cabbages,New South Wales,High,Medium,Medium,Medium,Low,Low,Low,Medium,Medium,High,High,High
+Cabbages,Victoria,High,High,High,Medium,Medium,Low,Low,Low,Medium,Medium,High,High
+Cabbages,Queensland,High,High,Medium,Medium,Medium,Low,Low,Low,Medium,High,High,High
+Cabbages,Western Australia,Medium,High,High,High,High,Medium,Medium,Medium,Medium,Medium,Low,Low
+Cabbages,South Australia,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Medium,Medium
+Cabbages,Tasmania,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Low,Low,Medium
+Capsicums,New South Wales,None,None,None,Low,Low,Low,Medium,Medium,Medium,Low,Low,None
+Capsicums,Victoria,Medium,Low,Low,Low,Low,Medium,High,High,Medium,Medium,Medium,Medium
+Capsicums,Queensland,Medium,Low,Low,Low,Low,Medium,High,High,High,Medium,Medium,Medium
+Capsicums,Western Australia,Low,Low,Low,Low,Medium,Medium,Medium,High,High,Medium,Medium,Low
+Capsicums,South Australia,Low,Low,Medium,Medium,Medium,Medium,High,High,Medium,Medium,Low,Low
+Capsicums,Tasmania,Low,Low,Low,Medium,Medium,Medium,Medium,High,Medium,Medium,Medium,Low
+Carrots,New South Wales,Medium,Medium,Medium,Low,Low,Low,Low,Medium,Medium,Medium,High,High
+Carrots,Victoria,High,Medium,Medium,Medium,Low,Low,Medium,Medium,Medium,Medium,High,High
+Carrots,Queensland,Medium,Medium,Medium,Low,Low,Medium,Medium,Medium,High,High,High,High
+Carrots,Western Australia,High,Medium,Medium,Low,Low,Low,Medium,Medium,Medium,High,High,High
+Carrots,South Australia,Medium,Medium,Medium,Medium,Low,Low,Low,Medium,Medium,Medium,Medium,Medium
+Carrots,Tasmania,High,High,High,Medium,Medium,Low,Low,Low,Medium,Medium,Medium,High
+Cauliflower,New South Wales,High,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,High
+Cauliflower,Victoria,High,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,High
+Cauliflower,Queensland,Medium,High,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Low
+Cauliflower,Western Australia,Medium,High,High,High,Medium,Medium,Low,Low,Low,Low,Low,Low
+Cauliflower,South Australia,Medium,Medium,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium
+Cauliflower,Northern Territory,Medium,Medium,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium
+Cauliflower,Tasmania,Medium,Medium,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium
+Celery,New South Wales,None,Low,Low,Low,Medium,Medium,Low,Low,None,None,None,None
+Celery,Victoria,Low,Low,Medium,Medium,High,High,High,High,Medium,Medium,Low,Low
+Celery,Queensland,Medium,Low,Medium,Medium,High,High,Medium,Medium,Medium,Low,Low,Medium
+Celery,Western Australia,Low,Low,Low,Medium,High,High,Medium,Medium,Low,Low,Low,Low
+Celery,South Australia,None,None,None,Low,Medium,Medium,Low,None,None,None,None,None
+Celery,Tasmania,Low,Low,Low,Low,Medium,Medium,High,Medium,Low,Low,Low,Low
+Chillies,New South Wales,None,None,None,Low,Low,Low,Medium,Medium,Medium,Low,Low,None
+Chillies,Victoria,Low,Low,Low,Low,Low,Low,Medium,Medium,Low,Low,Low,Low
+Chillies,Queensland,Low,Low,Low,Low,Low,Medium,High,High,High,Medium,Medium,Low
+Chillies,Western Australia,Low,Low,Low,Low,Low,Low,Medium,Medium,Medium,Medium,Low,Low
+Chillies,Northern Territory,None,None,None,None,None,Low,Low,Low,Low,Low,Low,None
+Cucumbers,New South Wales,Low,Medium,Medium,High,High,High,Medium,Medium,Medium,Medium,Low,Low
+Cucumbers,Victoria,Low,Low,Medium,Medium,Medium,High,High,Medium,Medium,Low,Low,Low
+Cucumbers,Queensland,Medium,Medium,Medium,Medium,High,High,High,Medium,Medium,Medium,Medium,Medium
+Cucumbers,Western Australia,Low,Low,Medium,Medium,Medium,High,High,Medium,Medium,Low,Low,Low
+Cucumbers,South Australia,Medium,Medium,Medium,High,High,High,High,High,Medium,Medium,Medium,Medium
+Cucumbers,Tasmania,Low,Low,Low,Low,Low,Medium,Medium,Low,Low,Low,Low,Low
+Cucumbers,Northern Territory,Low,Low,Low,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,Low
+Eggplants,New South Wales,Medium,Medium,Medium,Low,Low,Medium,High,High,High,Medium,Medium,Medium
+Eggplants,Victoria,Low,Low,Low,Low,Medium,Medium,High,High,Medium,Medium,Medium,Low
+Eggplants,Queensland,Medium,Low,Low,Low,Low,Medium,Medium,High,High,High,Medium,Medium
+Eggplants,Western Australia,Medium,Low,Low,Low,Low,Medium,Medium,Medium,High,High,Medium,Medium
+Eggplants,South Australia,Low,Low,Low,Low,None,None,Medium,Medium,High,High,High,Low
+Eggplants,Tasmania,None,None,None,None,None,None,Low,Low,Low,Low,None,None
+Spinach/Silverbeet/Kale ,New South Wales,Medium,Medium,Medium,Medium,Medium,High,Medium,Medium,Medium,Medium,Medium,Medium
+Spinach/Silverbeet/Kale ,Victoria,High,High,Medium,Medium,Medium,High,High,High,Medium,Medium,Medium,High
+Spinach/Silverbeet/Kale ,Queensland,Medium,Medium,Medium,Medium,High,High,High,Medium,Medium,Medium,Medium,Medium
+Spinach/Silverbeet/Kale ,Western Australia,Medium,Medium,Low,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,Medium
+Spinach/Silverbeet/Kale ,South Australia,Low,Low,Low,Low,Low,Medium,Medium,Medium,Low,Low,Low,Low
+Spinach/Silverbeet/Kale ,Tasmania,None,None,Low,Low,Low,Low,Medium,Low,Low,Low,Low,None
+Fennel,New South Wales,Low,Low,Low,Low,Low,None,None,None,Low,Low,Low,Low
+Fennel,Victoria,Medium,Medium,Medium,Low,Low,None,None,None,Low,Low,Low,Medium
+Fennel,Queensland,Medium,Medium,Medium,Low,Low,None,None,None,Low,Low,Low,Medium
+Fennel,Western Australia,Low,Low,Low,None,None,None,None,None,None,None,None,Low
+Fennel,South Australia,Low,Low,None,None,None,None,None,None,None,None,Low,Low
+Parsley and other Fresh Herbs,New South Wales,Low,Low,Medium,Medium,Medium,High,High,Medium,Medium,Low,Low,Low
+Parsley and other Fresh Herbs,Victoria,Low,Low,Low,Medium,Medium,High,Medium,Medium,Low,Low,Low,Low
+Parsley and other Fresh Herbs,Queensland,Low,Low,Low,Medium,High,High,Medium,Low,Low,Low,Low,Low
+Parsley and other Fresh Herbs,Western Australia,Low,Low,Low,Medium,High,Medium,Low,Low,Low,Low,Low,Low
+Parsley and other Fresh Herbs,South Australia,None,Low,Low,Low,Low,Low,Low,Low,Low,Low,None,None
+Parsley and other Fresh Herbs,Tasmania,None,None,None,Low,Low,Medium,Medium,Medium,Low,None,None,None
+Garlic,New South Wales,Low,Low,Low,Low,Low,Low,Medium,Medium,Medium,Medium,Medium,Medium
+Garlic,Victoria,Low,Low,Low,Low,Low,Medium,High,High,Medium,Low,Low,Low
+Garlic,Queensland,Low,Low,Low,Low,Low,Low,High,Medium,Medium,Medium,Medium,Low
+Garlic,Western Australia,Low,Low,None,None,None,None,Medium,Low,Low,Low,Low,Low
+Garlic,South Australia,Low,Low,None,None,None,None,None,None,None,Low,Low,Low
+Garlic,Tasmania,Low,Low,None,None,None,None,None,None,None,None,Low,Low
+Ginger,New South Wales,None,None,None,Low,Medium,Medium,Low,None,None,None,None,None
+Ginger,Queensland,Medium,Medium,Medium,Medium,High,High,Low,Low,Low,Low,Low,Medium
+Ginger,Imported,Low,Low,None,None,None,Low,Low,Low,Low,Low,Low,None
+Lettuce,New South Wales,Medium,Medium,Medium,Medium,Medium,Medium,High,High,Medium,Low,Low,Low
+Lettuce,Victoria,Low,Medium,Medium,Medium,Medium,High,High,High,Medium,Medium,Medium,Low
+Lettuce,Queensland,Low,Low,Medium,Medium,High,High,High,Medium,Medium,Medium,Low,Low
+Lettuce,Western Australia,Low,Low,Medium,High,High,High,Medium,Medium,Low,Low,Low,Low
+Lettuce,South Australia,Low,Low,Low,Medium,Medium,High,Medium,Low,Low,Low,Low,Low
+Lettuce,Tasmania,Low,Low,Low,Medium,Medium,High,Medium,Low,Low,Low,Low,Low
+Leafy Asian Vegetables ,New South Wales,Low,Medium,Medium,High,High,Medium,Medium,Medium,Medium,Medium,Medium,Low
+Leafy Asian Vegetables ,Victoria,Low,Medium,Medium,High,High,Medium,Low,Low,Low,Low,Low,Low
+Leafy Asian Vegetables ,Queensland,Low,Low,Medium,Medium,High,High,Medium,Medium,Medium,Low,Low,Low
+Leafy Asian Vegetables ,Western Australia,Low,Medium,Medium,High,Medium,Medium,Low,Low,Low,Low,Low,Low
+Leafy Asian Vegetables ,South Australia,Low,Medium,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Low
+Leafy Asian Vegetables ,Tasmania,Low,Low,Low,Low,Low,None,None,None,None,None,None,None
+Leafy Asian Vegetables ,Northern Territory,None,Low,Medium,High,Medium,Low,None,None,None,None,None,None
+Leafy Salad,New South Wales,Low,Low,Low,Low,Low,Medium,Medium,High,High,Medium,Medium,Low
+Leafy Salad,Victoria,Low,Low,Low,Low,Medium,Medium,High,High,High,High,Medium,Medium
+Leafy Salad,Queensland,Low,Low,Low,Low,Medium,Medium,Medium,High,High,Medium,Medium,Low
+Leafy Salad,Western Australia,Low,Low,Low,Low,Low,Medium,Medium,Medium,Medium,Medium,Low,Low
+Leafy Salad,South Australia,Low,Low,Low,Low,Low,Low,Medium,Medium,Medium,Medium,Low,Low
+Leafy Salad,Tasmania,Low,Low,Low,Low,Low,Medium,Medium,High,Medium,Medium,Medium,Low
+Leeks,New South Wales,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,Medium,High
+Leeks,Victoria,Medium,High,High,High,Medium,Medium,Low,Low,Medium,Medium,Medium,Medium
+Leeks,Queensland,High,Medium,Medium,Medium,Medium,Low,Low,Low,Low,Medium,Medium,Medium
+Leeks,Western Australia,High,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,Medium
+Leeks,South Australia,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Medium,High
+Leeks,Tasmania,Medium,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Low
+Mushrooms,New South Wales,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium
+Mushrooms,Victoria,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium
+Mushrooms,Queensland,Medium,Medium,Medium,Medium,Medium,Low,Low,Low,Medium,Medium,Medium,Medium
+Mushrooms,Western Australia,Medium,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Medium
+Mushrooms,South Australia,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium
+Mushrooms,Tasmania,Medium,Medium,Medium,Low,Low,Low,Low,Low,Medium,Medium,Medium,Medium
+Onions,New South Wales,Medium,Medium,Medium,Medium,High,High,High,High,High,High,Medium,Medium
+Onions,Victoria,Low,Low,Medium,Medium,Medium,Medium,High,High,High,Medium,Medium,Medium
+Onions,Queensland,Low,Medium,Medium,Medium,Medium,Medium,Medium,High,High,High,Medium,Low
+Onions,Western Australia,Low,Low,Low,Medium,Medium,Medium,High,High,Medium,Medium,Medium,Low
+Onions,South Australia,Low,Low,Medium,Medium,High,High,High,High,Medium,Medium,Low,Low
+Onions,Tasmania,Low,Low,Low,Low,Medium,Medium,Medium,High,High,Medium,Medium,Low
+Onions,Imported,Low,Low,Low,Low,Low,Low,Low,Low,Low,Low,Low,Low
+Parsnips,New South Wales,High,Medium,Medium,Medium,Low,Low,Low,Low,Low,Medium,Medium,High
+Parsnips,Victoria,High,High,Medium,Medium,Medium,Low,Low,Low,Medium,Medium,High,High
+Parsnips,Queensland,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,Medium,High
+Parsnips,Western Australia,Medium,Medium,Medium,Medium,Low,Low,Low,Low,Medium,Medium,Medium,High
+Parsnips,South Australia,Medium,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,Medium,Medium
+Parsnips,Tasmania,Medium,Medium,Low,Low,Low,Low,Low,Low,Low,Low,Medium,Medium
+Peas,New South Wales,Low,Medium,High,Medium,Medium,Low,Low,None,Low,Low,None,None
+Peas,Victoria,Low,Medium,High,High,Medium,Medium,Low,None,None,Low,Low,None
+Peas,Queensland,Low,High,High,Medium,Medium,Low,Low,None,Low,Low,None,None
+Peas,Western Australia,Low,Medium,Medium,Medium,Medium,Low,Low,None,Low,Low,None,None
+Peas,South Australia,Low,Low,Medium,Medium,Medium,Low,Low,None,Low,Low,None,None
+Peas,Tasmania,Medium,Medium,High,High,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium
+Potatoes,New South Wales,High,Medium,Medium,Medium,Medium,Low,Medium,Medium,High,High,High,High
+Potatoes,Victoria,High,High,High,High,High,Medium,Medium,Medium,High,High,High,High
+Potatoes,Queensland,High,Medium,Medium,Medium,Medium,Low,Low,Low,Medium,High,High,High
+Potatoes,Western Australia,High,High,Medium,Medium,Medium,Low,Medium,Medium,High,High,High,High
+Potatoes,South Australia,High,High,High,High,High,Medium,High,High,High,High,High,High
+Potatoes,Tasmania,High,High,High,High,Medium,Medium,Medium,High,High,High,High,High
+Pumpkins,New South Wales,High,Medium,Medium,Medium,None,None,Low,Low,Medium,Medium,Medium,High
+Pumpkins,Victoria,Medium,Medium,Low,Low,None,None,Low,Low,Low,Low,Low,Medium
+Pumpkins,Queensland,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,High,High,High
+Pumpkins,Western Australia,Medium,Low,Low,Low,None,None,Medium,High,High,High,Medium,Low
+Pumpkins,South Australia,Medium,Medium,Low,Low,None,None,Low,Low,Low,Low,Medium,Medium
+Pumpkins,Tasmania,Medium,Medium,Low,Low,None,None,Low,Low,Low,Low,Low,Medium
+Pumpkins,Northern Territory,Medium,Low,Low,Low,None,None,Low,Medium,Medium,High,High,Medium
+Sweet corn,New South Wales,Low,Low,Low,Medium,Medium,High,High,Medium,Medium,Medium,Medium,Low
+Sweet corn,Victoria,Low,Low,Low,Low,Medium,Medium,High,High,Medium,Medium,Low,Low
+Sweet corn,Queensland,Low,Low,Medium,Medium,Medium,High,High,High,Medium,Medium,Medium,Low
+Sweet corn,Western Australia,Low,Low,Low,Low,Medium,Medium,High,High,Medium,Low,Low,Low
+Sweet corn,South Australia,Low,Low,Low,Low,Low,Medium,Medium,Medium,Medium,Medium,Low,Low
+Sweet corn,Tasmania,Low,Low,Low,Low,Low,Medium,Medium,Medium,Medium,Low,Low,Low
+Sweet potatoes,New South Wales,None,None,None,None,None,None,Low,Medium,High,Medium,Medium,Low
+Sweet potatoes,Victoria,None,None,None,None,None,Low,Low,Medium,High,Medium,Low,Low
+Sweet potatoes,Queensland,Medium,Medium,Medium,Low,Medium,Medium,Medium,High,High,High,High,High
+Sweet potatoes,Western Australia,None,None,None,Low,Low,Low,Medium,Medium,High,Medium,Low,Low
+Sweet potatoes,South Australia,None,None,None,None,None,Low,Low,Medium,Medium,Low,Low,Low
+Tomatoes,New South Wales,High,High,High,Medium,Medium,Medium,Medium,Medium,Medium,High,High,High
+Tomatoes,Victoria,High,High,High,High,Medium,Medium,Medium,Medium,High,High,High,High
+Tomatoes,Queensland,High,High,High,High,High,High,Medium,Medium,Medium,High,High,High
+Tomatoes,Western Australia,High,High,High,High,Medium,Medium,Medium,Medium,Medium,Medium,High,High
+Tomatoes,South Australia,High,High,Medium,Medium,Medium,Medium,Medium,Medium,Medium,Medium,High,High
+Tomatoes,Tasmania,Low,Low,Low,Low,Low,Low,Low,Low,Low,Low,Low,Low
+Tomatoes,Imported,None,None,None,None,Low,High,Medium,Medium,Low,None,None,None
+Zucchini,New South Wales,High,High,High,Medium,Medium,Low,Low,Low,Low,Medium,Medium,High
+Zucchini,Victoria,High,High,High,Medium,Medium,Medium,Low,Low,Low,Low,Medium,High
+Zucchini,Queensland,High,High,High,High,Medium,Medium,Low,Low,Medium,Medium,High,High
+Zucchini,Western Australia,High,Medium,Medium,Low,Low,Low,Low,Low,Low,Medium,Medium,Medium
+Zucchini,South Australia,High,Medium,Low,Low,None,None,None,Low,Low,Low,Medium,High
+Zucchini,Tasmania,Low,Low,Low,None,None,None,None,None,None,None,Low,Low
+Zucchini,Northern Territory,Low,Low,None,None,None,None,None,None,None,None,Low,Low

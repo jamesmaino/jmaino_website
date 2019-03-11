@@ -1,0 +1,73 @@
+---
+title: Australian seasonality of fruit and vegetables
+author: ~
+date: '2019-03-11'
+slug: australian-horticulture-seasonality
+categories: []
+tags: ["", "population", "exponential"]
+header:
+  caption: ''
+  image: ''
+---
+
+
+
+<p>As pest scientists, it is important to understand how crop seasonality overlaps with pest seasonality.</p>
+<p>But vegetable and fruit seasonality in Australia is important for a few other reasons. In season produce is cheaper, fresher, with a lower carbon footprint, compared with imported produce, due to increased local availability. In addition, different areas in Australia have different fruit production outputs e.g. high melon production in New South Wales but not in Victoria, so it is important to now what is grown near you.</p>
+<p>So the aim here is to visualise what the “best” fruit and vegetable is to buy depending on what month it is and which Australian state you live in.</p>
+<p>The first step is to start with data, which I compiled from the fruit and vegetable <a href="https://www.horticulture.com.au/growers/help-your-business-grow/research-reports-publications-fact-sheets-and-more/australian-horticulture-statistics-handbook/">Horticulture Australia Statistics Handbooks</a>. The publications list rough estimates of production levels (none, low, medium, high) for each commodity for each state, for each month. That’s a few dimensions, so here I’ll try and display the data succinctly.</p>
+<p>First I load and shape the data.</p>
+<pre class="r"><code>d = read_csv(&#39;data/crops/CommoditySeasonalityHortHandbook16_17.csv&#39;) %&gt;% 
+  gather(Month, Production, -Commodity, -State) %&gt;% 
+  mutate(Month = as.Date(paste(&#39;01&#39;, Month, &#39;2017&#39;), format = &#39;%d %b %Y&#39;)) %&gt;% 
+  mutate(Commodity = factor(Commodity, levels = rev(unique(Commodity)))) %&gt;%
+  filter(Production != &#39;None&#39;) %&gt;%
+  mutate(Production = factor(Production, levels = c(&#39;Low&#39;,&#39;Medium&#39;,&#39;High&#39;)))
+head(d)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##   Commodity State             Month      Production
+##   &lt;fct&gt;     &lt;chr&gt;             &lt;date&gt;     &lt;fct&gt;     
+## 1 Apples    New South Wales   2017-07-01 Medium    
+## 2 Apples    Victoria          2017-07-01 Medium    
+## 3 Apples    Queensland        2017-07-01 Medium    
+## 4 Apples    Western Australia 2017-07-01 Medium    
+## 5 Apples    South Australia   2017-07-01 Medium    
+## 6 Apples    Tasmania          2017-07-01 Medium</code></pre>
+<p>Next, I want to sort produce by season, so that in-season produce are closer together.</p>
+<pre class="r"><code>season_start = d %&gt;% 
+  group_by(State, Commodity) %&gt;%
+  filter(Production == &#39;High&#39;) %&gt;%
+  summarise(start = min(Month))
+d = left_join(d, season_start)</code></pre>
+<p>Finally, I loop through each state and plot the production level for each crop in each month.</p>
+<pre class="r"><code>for (istate in unique(d$State)) {
+  cat(istate)
+  p = ggplot(d %&gt;% filter(State == istate) %&gt;% 
+               mutate(Commodity = factor(Commodity, levels = unique(Commodity[order(start)]))))  +
+    geom_line(aes(Month, Commodity, size = Production, colour = Production, group = Commodity)) + 
+    scale_color_manual(values = c(&#39;#db0606&#39;, &#39;#e8933a&#39;,&#39;#87e504&#39;))+
+    scale_size_manual(values = c(1,2,3)) + 
+    scale_x_date(date_labels = &#39;%b&#39;, date_breaks = &#39;1 month&#39;) + 
+    mydarktheme + 
+    theme(panel.grid.minor.x = element_blank(),
+          panel.grid.major.x = element_blank()) +
+    ggtitle(istate) + 
+    xlab(&#39;&#39;) + ylab(&#39;&#39;)
+  print(p)
+}</code></pre>
+<pre><code>## New South Wales</code></pre>
+<p><img src="/post/2019-03-11-australian-horticulture-seasonality_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre><code>## Victoria</code></pre>
+<p><img src="/post/2019-03-11-australian-horticulture-seasonality_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<pre><code>## Queensland</code></pre>
+<p><img src="/post/2019-03-11-australian-horticulture-seasonality_files/figure-html/unnamed-chunk-4-3.png" width="672" /></p>
+<pre><code>## Western Australia</code></pre>
+<p><img src="/post/2019-03-11-australian-horticulture-seasonality_files/figure-html/unnamed-chunk-4-4.png" width="672" /></p>
+<pre><code>## South Australia</code></pre>
+<p><img src="/post/2019-03-11-australian-horticulture-seasonality_files/figure-html/unnamed-chunk-4-5.png" width="672" /></p>
+<pre><code>## Tasmania</code></pre>
+<p><img src="/post/2019-03-11-australian-horticulture-seasonality_files/figure-html/unnamed-chunk-4-6.png" width="672" /></p>
+<pre><code>## Northern Territory</code></pre>
+<p><img src="/post/2019-03-11-australian-horticulture-seasonality_files/figure-html/unnamed-chunk-4-7.png" width="672" /></p>
+<pre><code>## Imported</code></pre>
+<p><img src="/post/2019-03-11-australian-horticulture-seasonality_files/figure-html/unnamed-chunk-4-8.png" width="672" /></p>
