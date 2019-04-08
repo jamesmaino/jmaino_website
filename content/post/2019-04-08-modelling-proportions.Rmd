@@ -1,0 +1,97 @@
+---
+title: Modelling proportions - Part 1
+author: null
+date: '2019-04-08'
+slug: modelling-proportions-part-1
+categories: []
+tags: ["probability", "statistics", "mechanistic", "R"]
+header:
+  caption: 'extrapolating binomial data with a linear model'
+  image: 'extrapolation.png'
+editor_options: 
+  chunk_output_type: inline
+---
+```{r, echo=F, message=F,warning=F}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+source('data/useful_scripts/mydarktheme.R')
+```
+
+Proportions are a funny thing in statistics. Some people just seem to love percentages. But there is a dark side to modelling a response variable as a  percentage. 
+
+For example, I might be tempted to fit a linear model to mortality data on some insects exposed to heat stress for some time. To prove the point I will simulate some data. 
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+time = rep(0:9, 10)
+n = 100
+a =  -1
+b =   0.1
+p = 1/(1 + exp(-(a + b*time)))
+d = data_frame(time=time, dead = rbinom(length(p), n, p), n=n, dead_p=dead/n)
+head(d)
+```
+
+Now I will fit a simple linear model to the response. 
+
+```{r}
+m1 = lm(dead_p ~ time, data=d)
+summary(m1)
+```
+But underpinning these proportions are Bernoulli trials where the probability of each insect dieing is p, which depends on time. Most of the time, a proportion can be rephrased as a binomial trial in one way or another. 
+
+```{r}
+m2 = glm(cbind(dead, n - dead) ~ time, family = binomial('logit'), data=d)
+summary(m2)
+```
+We can plot both model predictions of the data. 
+
+```{r}
+d$pred1 = predict(m1)
+d$pred2 = predict(m2, type='response')
+ggplot(d, aes(x=time, y=dead_p)) + 
+  geom_point(col='red') + 
+  geom_line(aes(y=pred1), col='red') + 
+  geom_line(aes(y=pred2), col='green') + 
+  mydarktheme
+```
+
+It doesn't look like there is much between each prediction, so why should it matter which model we choose? Well, a good reason it that we know before hand that the relationship between survival and heat stress shouldn't be linear, because the mortality won't keep increasing indefinitely - it must stop once all insects are dead! 
+
+Indeed, if we use the fitted curves to extrapolate the results into longer exposure times with more simulated data, we see pretty quickly that the linear model breaks.
+
+```{r}
+time = rep(10:90, 10)
+p = 1/(1 + exp(-(a + b*time)))
+d2 = data_frame(time=time, dead = rbinom(length(p), n, p), dead_p  = dead/n)
+d2$pred1 = predict(m1, newdata=d2)
+d2$pred2 = predict(m2, newdata=d2, type='response')
+ggplot(d2, aes(x=time, y=dead_p)) + 
+  geom_point(data=d2, col = 'pink') +
+  geom_line(aes(y=pred1), col='red') + 
+  geom_line(aes(y=pred2), col='blue') + 
+  geom_point(data=d, col='red') + 
+  mydarktheme
+```
+
+But perhaps a more subtle reason is that the different liklihood functions associated with each model provide a different interpretation of the response variance and the fitted coefficients. The linear model assumes the response is continuous, while the binomial model only assumes that the dependence of p on time is continuous. The coefficients in the binomial model relate to the likelihood p/(1-p).
+
+Interestingly, in spite of a warning, we get nearly the same inference if we fit the glm using the proportion data, but the estimated error is out by a factor of 10. This is a nice clue (think: se = sd/sqrt(n))! To correct this, we can add a weighting term which corresponds to the size of the trial.
+
+
+```{r}
+m2_p = 
+  glm(dead_p ~ time, family = binomial('logit'), data=d)
+m2_p_weighted = 
+  glm(dead_p ~ time, family = binomial('logit'), data=d, weights=d$n)
+
+broom::tidy(m2)
+broom::tidy(m2_p)
+broom::tidy(m2_p_weighted)
+```
+The cause of the discrepency is that there is no information on the number of trials in a simple proportion. For exaple, if I observed 497 heads in 1000 flips, or 1 head in two, both would yield p = 0.5, but I would be more certain of a coin's fairness in the former scenario. This is also another reason to not model proportions if possible, i.e. you are throwing away hard earned data! 
+
+
+

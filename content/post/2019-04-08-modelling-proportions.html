@@ -1,0 +1,131 @@
+---
+title: Modelling proportions - Part 1
+author: null
+date: '2019-04-08'
+slug: modelling-proportions-part-1
+categories: []
+tags: ["probability", "statistics", "mechanistic", "R"]
+header:
+  caption: 'extrapolating binomial data with a linear model'
+  image: 'extrapolation.png'
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+
+<p>Proportions are a funny thing in statistics. Some people just seem to love percentages. But there is a dark side to modelling a response variable as a percentage.</p>
+<p>For example, I might be tempted to fit a linear model to mortality data on some insects exposed to heat stress for some time. To prove the point I will simulate some data.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre class="r"><code>time = rep(0:9, 10)
+n = 100
+a =  -1
+b =   0.1
+p = 1/(1 + exp(-(a + b*time)))
+d = data_frame(time=time, dead = rbinom(length(p), n, p), n=n, dead_p=dead/n)
+head(d)</code></pre>
+<pre><code>## # A tibble: 6 x 4
+##    time  dead     n dead_p
+##   &lt;int&gt; &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt;
+## 1     0    27   100   0.27
+## 2     1    24   100   0.24
+## 3     2    26   100   0.26
+## 4     3    34   100   0.34
+## 5     4    39   100   0.39
+## 6     5    35   100   0.35</code></pre>
+<p>Now I will fit a simple linear model to the response.</p>
+<pre class="r"><code>m1 = lm(dead_p ~ time, data=d)
+summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = dead_p ~ time, data = d)
+## 
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -0.093673 -0.029095  0.000664  0.025573  0.091145 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.275964   0.007662   36.02   &lt;2e-16 ***
+## time        0.020964   0.001435   14.61   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.04122 on 98 degrees of freedom
+## Multiple R-squared:  0.6853, Adjusted R-squared:  0.6821 
+## F-statistic: 213.4 on 1 and 98 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>But underpinning these proportions are Bernoulli trials where the probability of each insect dieing is p, which depends on time. Most of the time, a proportion can be rephrased as a binomial trial in one way or another.</p>
+<pre class="r"><code>m2 = glm(cbind(dead, n - dead) ~ time, family = binomial(&#39;logit&#39;), data=d)
+summary(m2)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = cbind(dead, n - dead) ~ time, family = binomial(&quot;logit&quot;), 
+##     data = d)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -1.92690  -0.58860   0.03242   0.52819   1.92748  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -0.948457   0.040203  -23.59   &lt;2e-16 ***
+## time         0.090829   0.007321   12.41   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 228.130  on 99  degrees of freedom
+## Residual deviance:  71.846  on 98  degrees of freedom
+## AIC: 572.48
+## 
+## Number of Fisher Scoring iterations: 3</code></pre>
+<p>We can plot both model predictions of the data.</p>
+<pre class="r"><code>d$pred1 = predict(m1)
+d$pred2 = predict(m2, type=&#39;response&#39;)
+ggplot(d, aes(x=time, y=dead_p)) + 
+  geom_point(col=&#39;red&#39;) + 
+  geom_line(aes(y=pred1), col=&#39;red&#39;) + 
+  geom_line(aes(y=pred2), col=&#39;green&#39;) + 
+  mydarktheme</code></pre>
+<p><img src="/post/2019-04-08-modelling-proportions_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>It doesn’t look like there is much between each prediction, so why should it matter which model we choose? Well, a good reason it that we know before hand that the relationship between survival and heat stress shouldn’t be linear, because the mortality won’t keep increasing indefinitely - it must stop once all insects are dead!</p>
+<p>Indeed, if we use the fitted curves to extrapolate the results into longer exposure times with more simulated data, we see pretty quickly that the linear model breaks.</p>
+<pre class="r"><code>time = rep(10:90, 10)
+p = 1/(1 + exp(-(a + b*time)))
+d2 = data_frame(time=time, dead = rbinom(length(p), n, p), dead_p  = dead/n)
+d2$pred1 = predict(m1, newdata=d2)
+d2$pred2 = predict(m2, newdata=d2, type=&#39;response&#39;)
+ggplot(d2, aes(x=time, y=dead_p)) + 
+  geom_point(data=d2, col = &#39;pink&#39;) +
+  geom_line(aes(y=pred1), col=&#39;red&#39;) + 
+  geom_line(aes(y=pred2), col=&#39;blue&#39;) + 
+  geom_point(data=d, col=&#39;red&#39;) + 
+  mydarktheme</code></pre>
+<p><img src="/post/2019-04-08-modelling-proportions_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>But perhaps a more subtle reason is that the different liklihood functions associated with each model provide a different interpretation of the response variance and the fitted coefficients. The linear model assumes the response is continuous, while the binomial model only assumes that the dependence of p on time is continuous. The coefficients in the binomial model relate to the likelihood p/(1-p).</p>
+<p>Interestingly, in spite of a warning, we get nearly the same inference if we fit the glm using the proportion data, but the estimated error is out by a factor of 10. This is a nice clue (think: se = sd/sqrt(n))! To correct this, we can add a weighting term which corresponds to the size of the trial.</p>
+<pre class="r"><code>m2_p = 
+  glm(dead_p ~ time, family = binomial(&#39;logit&#39;), data=d)
+m2_p_weighted = 
+  glm(dead_p ~ time, family = binomial(&#39;logit&#39;), data=d, weights=d$n)
+
+broom::tidy(m2)</code></pre>
+<pre><code>## # A tibble: 2 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)  -0.948    0.0402      -23.6 4.67e-123
+## 2 time          0.0908   0.00732      12.4 2.43e- 35</code></pre>
+<pre class="r"><code>broom::tidy(m2_p)</code></pre>
+<pre><code>## # A tibble: 2 x 5
+##   term        estimate std.error statistic p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1 (Intercept)  -0.948     0.402      -2.36  0.0183
+## 2 time          0.0908    0.0732      1.24  0.215</code></pre>
+<pre class="r"><code>broom::tidy(m2_p_weighted)</code></pre>
+<pre><code>## # A tibble: 2 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)  -0.948    0.0402      -23.6 4.67e-123
+## 2 time          0.0908   0.00732      12.4 2.43e- 35</code></pre>
+<p>The cause of the discrepency is that there is no information on the number of trials in a simple proportion. For exaple, if I observed 497 heads in 1000 flips, or 1 head in two, both would yield p = 0.5, but I would be more certain of a coin’s fairness in the former scenario. This is also another reason to not model proportions if possible, i.e. you are throwing away hard earned data!</p>
