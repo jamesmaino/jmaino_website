@@ -52,6 +52,15 @@ sand_percent <- get_soils_data(product = 'NAT', attribute = 'SND',
                         component = 'VAL', depth = 1,
                         aoi = aoi, write_out = FALSE)
 ```
+We can also extract information for a single point of interest (`poi`). 
+
+```{r}
+poi <- c(142.798591, -37.214808)
+organic_carbon_percent <- get_soils_point(product = 'NAT', attribute = 'SOC',
+                        component = 'ALL', depth = 1,
+                        poi = poi)
+organic_carbon_percent
+```
 
 With one line of code we can see the data interactively usign the `mapview` package, but for more customisability I highly recommend `leaflet` for interactive maps (`mapview` is a wrapper for this) and `tmap` for static maps. Note that the number of pixels is slightly reduced during plotting with `mapview`.
 

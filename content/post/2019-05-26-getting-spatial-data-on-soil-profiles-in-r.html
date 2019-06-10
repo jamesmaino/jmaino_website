@@ -21,7 +21,7 @@ header:
 <script src="/rmarkdown-libs/leaflet-binding/leaflet.js"></script>
 <script src="/rmarkdown-libs/leaflet-providers/leaflet-providers.js"></script>
 <script src="/rmarkdown-libs/leaflet-providers-plugin/leaflet-providers-plugin.js"></script>
-<script src="/rmarkdown-libs/sand_percent/data_stars_sand_percent1ba9f0.txt"></script>
+<script src="/rmarkdown-libs/sand_percent/data_stars_sand_percenta5e802.txt"></script>
 <script src="/rmarkdown-libs/joda/joda.js"></script>
 <link href="/rmarkdown-libs/HomeButton/home-button.css" rel="stylesheet" />
 <script src="/rmarkdown-libs/HomeButton/home-button.js"></script>
@@ -314,6 +314,14 @@ library(slga)</code></pre>
 sand_percent &lt;- get_soils_data(product = &#39;NAT&#39;, attribute = &#39;SND&#39;,
                         component = &#39;VAL&#39;, depth = 1,
                         aoi = aoi, write_out = FALSE)</code></pre>
+<p>We can also extract information for a single point of interest (<code>poi</code>).</p>
+<pre class="r"><code>poi &lt;- c(142.798591, -37.214808)
+organic_carbon_percent &lt;- get_soils_point(product = &#39;NAT&#39;, attribute = &#39;SOC&#39;,
+                        component = &#39;ALL&#39;, depth = 1,
+                        poi = poi)
+organic_carbon_percent</code></pre>
+<pre><code>##   NAT_SOC_VAL_000_005 NAT_SOC_CLO_000_005 NAT_SOC_CHI_000_005
+## 1            5.296265            1.480427            22.69777</code></pre>
 <p>With one line of code we can see the data interactively usign the <code>mapview</code> package, but for more customisability I highly recommend <code>leaflet</code> for interactive maps (<code>mapview</code> is a wrapper for this) and <code>tmap</code> for static maps. Note that the number of pixels is slightly reduced during plotting with <code>mapview</code>.</p>
 <pre class="r"><code>mapview::mapview(sand_percent)</code></pre>
 <div id="htmlwidget-1" style="width:672px;height:480px;" class="leaflet html-widget"></div>
@@ -326,4 +334,4 @@ pal=get_brewer_pal(&quot;Spectral&quot;, n = 9,plot = FALSE)
 tm_shape(wetness) +
   tm_raster(style = &#39;cont&#39;, breaks=c(1,3,6,7,8,12,15), palette = pal) +
   tm_layout(outer.bg.color = &#39;#313338&#39;)</code></pre>
-<p><img src="/post/2019-05-26-getting-spatial-data-on-soil-profiles-in-r_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="/post/2019-05-26-getting-spatial-data-on-soil-profiles-in-r_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
