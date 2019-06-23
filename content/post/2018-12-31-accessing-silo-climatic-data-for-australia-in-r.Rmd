@@ -15,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 source('data/useful_scripts/mydarktheme.R')
 ```
 
+EDIT (24/06/2019): After trying to access SILO data in another project I found that their site's security protocols have lapsed. Hopefully it is rectified soon, but to bypass this, you need to pass the argument `config = httr::config(ssl_verifypeer = FALSE)` everything the site is queried with `GET()`.
+
 This short post will describe how to access SILO climatic data for Australia. The data is available as both csv and json, but here we work with the two-dimensional csv format to make use of R's powerful data table functionality.  
 
 

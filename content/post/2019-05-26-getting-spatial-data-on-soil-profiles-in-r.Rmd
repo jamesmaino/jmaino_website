@@ -6,7 +6,7 @@ slug: getting-spatial-data-on-soil-profiles-in-r
 categories: []
 tags: ["R", "agriculture", "soil"]
 header:
-  caption: ''
+  caption: 'Grampians wetness profile as estimated by the Soil and Landscape Grid of Australia'
   image: 'grampian_wetness.png'
 ---
 ```{r, echo=F, message=F,warning=F}
