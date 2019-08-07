@@ -1,0 +1,68 @@
+---
+title: Communicating science to practitioners - 4 tips for public speaking
+author: James Maino
+date: '2019-07-01'
+slug: communicating-science-to-practitioners
+categories: []
+tags: ["science", "communication"]
+header:
+  caption: ''
+  image: ''
+  preview: yes
+---
+
+```{r, echo=F, message=F, warning=F, eval=TRUE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+source('data/useful_scripts/mydarktheme.R')
+```
+
+# Motivation for communicating science
+I never liked public speaking. When I was in primary school, I remember getting my younger sister to buy things for me from shops so I could avoid talking to adults. Although less severe in my adult life, I still can’t say I particularly enjoy giving presentations for their own sake. But what I have realised is that communication is a hugely important skill in just about professional role, which motivated me to push passed the discomfort. For me specifically, I am passionate about conducting applied research, but even more so about seeing this cutting-edge science get into the hands of practitioners to affect wider practice change. This goal requires clear and effective science communication to achieve the greatest impact. Too often does important science not progress beyond the lab, or journal publication, and into wider society. 
+
+# My focus areas when communicating science to practitioners
+I believe in the 80:20 rule – that is, 80% of the quality comes from the first 20% percent of the effort (or thereabouts). Thus, I have prioritised the following strategies that I find useful in order of importance.
+
+## 1.	Empathy (put yourself in the seats of the audience)
+Think about what you like to see in presentations by others and empathise with the goals and motivations of different audiences with different interests. 
+
+Regardless of the audience, I find that the most engaging speakers are passionate, clearly-spoken, and confident. Hopefully the passion comes easy to most researchers – although it often doesn’t across. This is probably due to confidence. I know a lot of people who experience varying degrees of anxiety when public speaking (myself included). But what worked for me was to just adopt the “fake it until you make it” strategy. It gradually becomes less uncomfortable the more you are exposed – just like any beneficial exercise. More importantly, it helps to remember the longer-term motivation for public speaking (see above), which has helped me to persist with it. Confidence should not be confused for arrogance but, rather, I believe presenters should aim to speak with conviction. Why should any body listen to what you have to say if it sounds like you don’t even believe it yourself? Tied in with confidence is familiarity with the subject matter, which I address separately below.
+
+Other style choices will depend on the audience. Audience members may be researchers, advisers, growers, policy makers, other community members or stakeholders - each have their own goals, priorities, and jargon. For example, researchers are typically interested in a narrower range of topics at a deeper level of detail, while agronomists and growers will want practical advice on a broader range of topics that they can implement tomorrow. It is your task to make convince them of why they should care – empathy helps to identify these divergent priorities and to tailer your talk to them. 
+
+
+## 2.	Have a conservation with the audience 
+At worst, I think presenters should aim to have a conversation with their audience. At best, they should aim to have a well-structured conversation. But I think the conversational aspect is most important here; not literally having a conversation, but encouraging the feeling of having one in both yourself and the audience (eye contact, open posture, using language that feels natural). People tend to prefer discussions, and human interaction, rather than assimilating raw information – the human element makes the information more engaging. It’s harder to ignore someone if you feel like they are talking with you, rather than to you. 
+
+I think fostering this conversational frame of mind requires speakers to be confident and relaxed, as you would be having a discussion with a family member, friend, or colleague. Address the audience respectfully, but casually. If you feel more at ease with the audience, not only does this make you feel comfortable, but also the audience. This is, of course, easier said than done but it helps to have something to aim for and, again, practice makes perfect.   
+
+As with any conversation, it is good to have some take home messages in mind. What are the main points you are trying to communicate? After setting the scene of the talk, you can lead with these take home message (introduction), justify them with a scientific story (middle of the talk), and then reiterate them at the end of the talk (conclusion). Setting the scene can include a personal story or zooming out to look at the wider context in which this piece of research is situated. I think this is the part of the talk that you can have the most fun with but creating that initial engagement with the audience is also important for sustained interest in the remainder of your talk.
+
+## 3.	Familiarity with content (and slides). 
+After deciding what information to include in your talk (based on the interests and motivations of the audience), ensure you are familiar with the content. The main reason being that you will have difficulty remaining relaxed and talking with conviction if you aren’t comfortable with the content. Usually this isn’t a problem as we tend to speak about things that we already know, but it also helps to be familiar with your talk structure and/or slides. This will help with the continuity and flow of the talk. A good test I use on myself is to see if I can quickly predict what the next slide will be before seeing it. 
+
+Practice the first few slides more than the rest. Getting the introduction to “autopilot” should help you ease into the talk and give you a bit of momentum. Talking points or notes are fine, particularly when building the structure of the talk, but I find that relying on them impedes the flow of the talk (e.g. stopping to check notes or reading text directly). 
+
+I typically only run through a new talk once or twice, mostly to make sure it fits to the allocated time. Of course, I may need more time if unfamiliar with the content. But if you are familiar with the content it is more a matter of building a logical structure, which, for me, takes the bulk of the time when preparing for a talk. A practice run through will also reveal any discontinuities in the structure. If you have a willing (and honest!) practice audience, the constructive feedback can also help you improve the talk. 
+
+But, for me, the most important thing is just being familiar with the content. This allows you to discuss what you are already comfortable talking about and encourages the relaxed and conversational mindset discussed above.  
+ 
+## 4.	Slides as a support tool rather than a crutch or a distraction
+I tend to use slides, because I think they can be effective support tools for my take home messages. I have also seen excellent talks given by people without slides (they tend to excel in the other areas discussed). For me, I find the process of making slides helps me in structuring the information in a logical progression. However, the more time the audience spends looking at your slides, the less time will be spent listening to what you are saying. This may be okay if visual communication is more effective than words. For example, a map is far more efficient at describing the spatial location of things compared to a verbal description. But it is important to keep the attention trade-off in mind. 
+
+More specifically, I try to: 
+
+•	Ruthlessly minimise text on slides. Try reading text while listening to someone speak. Only one or the other can be absorbed, and often neither. 
+
+•	Use pictures or schematics instead of text. You can also use these as talking cues instead of text.
+
+•	Take the time to properly explain all the necessary components in a slide. If presenting graphs, remember that this is probably the first time the audience has seen it, so make sure the components are properly introduced. 
+
+•	Make sure the slides are legible (this should go without saying, but is a common occurrence)/ This includes text, but also graph elements like lines and shapes, etc. 
+
+Again, ask whether a slide is helping you communicate a message more efficiently, or is adding needless complexity or distraction.  
+
+
+
+
+
+
