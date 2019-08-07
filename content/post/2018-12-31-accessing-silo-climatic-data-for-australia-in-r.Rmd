@@ -5,6 +5,7 @@ date: '2018-12-31'
 slug: accessing-silo-climatic-data-for-australia-in-r
 categories: []
 tags: ["climate", "ecology", "database", "R"]
+draft: true
 header:
   caption: "SILO data in R"
   image: "MEL2018_temp_rain.png"
@@ -15,12 +16,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 source('data/useful_scripts/mydarktheme.R')
 ```
 
-EDIT (24/06/2019): After trying to access SILO data in another project I found that their site's security protocols have lapsed. Hopefully it is rectified soon, but to bypass this, you need to pass the argument `config = httr::config(ssl_verifypeer = FALSE)` everything the site is queried with `GET()`.
+This short post will describe how to access SILO climatic data for Australia..  
 
-This short post will describe how to access SILO climatic data for Australia. The data is available as both csv and json, but here we work with the two-dimensional csv format to make use of R's powerful data table functionality.  
-
-
-At the time of writing there were 18937 stations. We can access the metadata on each station (including location and years of available data), which will later become useful for selecting an appropriate weather station. 
+Since the first time I wrote this post, there has been a significant overhaul of the API so write a simplified (but functioning!) version of the previous post here.  
 
 ```{r}
 library(tidyverse)
@@ -29,8 +27,11 @@ library(tmap)
 ```
 
 ```{r}
-res <- httr::GET("https://siloapi.longpaddock.qld.gov.au/stations?format=csv")
-recs <- read_csv(httr::content(res, as="text"))
+res <- httr::GET("https://www.longpaddock.qld.gov.au/cgi-bin/silo/PatchedPointDataset.php?format=name&nameFrag=_")
+recs <- read_delim(httr::content(res, as="text"), delim = "|", 
+                   col_names = c('number','name','latitude','longitude','state', 'elevation', 'extra')) %>%
+  mutate(latitude = as.numeric(latitude)) %>%
+  mutate(longitude = as.numeric(longitude))
 stationsmeta = recs %>% 
   st_as_sf(coords = c('longitude', 'latitude'), crs = 4326)
 ```
@@ -46,90 +47,34 @@ tm_shape(spData::world %>% filter(name_long == "Australia")) +
             outer.bg.color = rgb(.2,.21,.27))
 ```
 
-Most stations have between 5 and 10 years of data.
-
-```{r}
-ggplot(stationsmeta) + 
-  geom_histogram(aes(x = ifelse(is.na(end_year), 2018, end_year) - start_year), 
-           breaks = seq(0, 200, by = 5)) +
-  xlab('years of data') +
-  mydarktheme
-
-```
-
-
-Useful metadata can be accessed, such as the names of climatic variables and their units. 
-
-```{r}
-# variable metadata
-silometa = read_csv('https://siloapi.longpaddock.qld.gov.au/variables?format=csv', col_types = 'ccc')
-knitr::kable(silometa)
-
-```
-
-Next we specify some options to help us select an appropriate weather station. The string `loc` is used to extract a coordinate using a geocoder. Alternatively you can manually input a longitude and latitude later. The dates `startdate` and `enddate` hold the dates across which we require climatic data. The string `apikey` holds the API key which is required to query the database and freely available upon registration [at the SILO landing page](https://data.qld.gov.au/dataset/silo-climate-api). 
-
-```{r}
-loc = 'Melbourne, Australia'
-startdate = as.Date('2018-01-01')
-enddate = as.Date('2018-12-30')
-apikey = 'PASTE YOUR API KEY HERE'
-
-```
-
-```{r, echo=F}
-load('data/apikey')
-```
-
-Filter the station metadata by station with data for our dates. As an aside, if the station is still in operation the `end_year` will be `NA`.
-
-```{r}
-stations = stationsmeta %>% 
-  filter(start_year <= format(startdate, '%Y')) %>%
-  filter(is.na(end_year) | (end_year >= format(enddate, '%Y')))
-
-```
-
-Convert the location string to a coordinate and find the closest weather station to the location.
-
-```{r}
-xy = tmaptools::geocode_OSM(loc,as.sf = TRUE)
-near_stat = stations[which.min(st_distance(xy, stations)), ]
-knitr::kable(near_stat)
-
-```
-
-We can also explicitly find the distance to the nearest weather station.
-
-```{r}
-st_distance(xy, near_stat)
-```
-
-Now we have the weather station id and a date range for which we require data we can query the SILO database.
+Fill in the longitude and latitude of the site, date range, format, and requested data. 
 
 ```{r}
 params = list(
-  apikey = apikey,
-  format = 'csv',
-  station = near_stat$number,
-  start = format(startdate, '%Y%m%d'),
-  finish = format(enddate, '%Y%m%d'),
-  variables = 'max_temp,min_temp,radiation,daily_rain'
+  lat="-27.50",
+  lon="135.00",
+  start="20160101", 
+  finish="20160131",
+  format="csv",
+  comment="RXN",
+  username="john.doe@xyz.com.au",
+  password="silo"
 )
-res <- httr::GET("https://siloapi.longpaddock.qld.gov.au/pointdata", query=params)
+res <- httr::GET("https://www.longpaddock.qld.gov.au/cgi-bin/silo/DataDrillDataset.php", query=params)
 silodata <- read_csv(httr::content(res, as="text")) 
 head(silodata)
 ```
 
 And finally, plot the data.
+
 ```{r}
-silodata %>% 
+silodata %>%
+  mutate(date = `YYYY-MM-DD`) %>%
   select(date, `Rain, mm` = daily_rain, `Min temp, C` =min_temp, `Max temp, C` = max_temp) %>%
   gather(variable, value, -date) %>%
   ggplot() + 
     geom_line(aes(date, value, colour = variable)) + 
     xlab('') + ylab('') +
-    ggtitle(loc) + 
     mydarktheme
 ```
 

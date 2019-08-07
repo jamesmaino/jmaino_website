@@ -59,8 +59,9 @@ sol = as.data.frame(
   ode(y = state, times = times, func = lotka_volterra_K, parms = parameters)
 )</code></pre>
 <p><img src="/post/2018-11-11-predator-prey-dynamics_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<p>And now plotting <span class="math inline">\(N\)</span> vs. <span class="math inline">\(P\)</span> with rainbow time.</p>
-<p><img src="/post/2018-11-11-predator-prey-dynamics_files/figure-html/unnamed-chunk-7-1.png" width="672" /> Wow! Now we have dampening and a stable state!</p>
+<p>And now plotting <span class="math inline">\(N\)</span> vs. <span class="math inline">\(P\)</span> with rainbow time.</p>
+<p><img src="/post/2018-11-11-predator-prey-dynamics_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+Wow! Now we have dampening and a stable state!</p>
 <pre class="r"><code>sol[nrow(sol),]</code></pre>
 <pre><code>##     time        N        P
 ## 501  100 8.002624 1.398892</code></pre>

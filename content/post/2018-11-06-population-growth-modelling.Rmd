@@ -150,7 +150,7 @@ Old school population demographers also built life tables for a cohort of indivi
 Let's use an example published by Carey and Bradley[^1] of the Atlantic Spider mite. The below table shows for each day $x$ the proportion surviving $P(x)$ and mean daily reproduction rate per individual for a synchronised cohort through time starting at egg lay.   
 
 ```{r, message = F, echo = F, warning = F}
-mite = read_csv('../../data/AtlanticSpiderMite_CareyBradley1982.csv')
+mite = read_csv('data/AtlanticSpiderMite_CareyBradley1982.csv')
 knitr::kable(mite, align = c('r','r','r'))
 
 ```

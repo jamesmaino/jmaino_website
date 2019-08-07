@@ -19,7 +19,9 @@ header:
 <p>Populations grow. They grow positively, if rates of reproduction &gt; mortality, or negatively, if reproduction &lt; mortality. For an unconstrained population of size <span class="math inline">\(N\)</span> this diffence in per capita reproduction and mortality is referred to as the <em>intrinsic growth rate</em>, <span class="math inline">\(r\)</span> and has the units individuals per individual per time <span class="math inline">\(N.N^{-1}.t^{-1}\)</span> . The value of <span class="math inline">\(r\)</span> is a constant if the age-distribution is constant (e.g. the proportion of reproductively active individuals in the population does not change). Taking <span class="math inline">\(r\)</span> as constant, the change in population size with time is simply:</p>
 <p><span class="math display">\[\frac{dN}{dt} = rN\]</span></p>
 <p>This is a rudimentary first-order differential equation which can be solved in a few simple steps.</p>
-<p><span class="math display">\[\int 1/N dN = \int r dt\]</span> <span class="math display">\[ln|N| = rt + C_0\]</span> <span class="math display">\[N = C_1 e^{rt}\]</span></p>
+<p><span class="math display">\[\int 1/N dN = \int r dt\]</span>
+<span class="math display">\[ln|N| = rt + C_0\]</span>
+<span class="math display">\[N = C_1 e^{rt}\]</span></p>
 <p>Solving <span class="math inline">\(C_1\)</span> for <span class="math inline">\(N = N_0\)</span> at <span class="math inline">\(t = t_0\)</span>:</p>
 <p><span class="math display">\[N = N_0 e^{rt}\]</span></p>
 <p>While the parameter <span class="math inline">\(r\)</span> hopefully makes conceptual sense, it is not straightforward to measure for a given species, as it will depend on the age structure (all juveniles means no reproduction), resource availability (food for growth), and environmental temperature (slow cold ectotherms). The age structure is assumed to be in a steady state, i.e. the relative proportion of different age classes does not change. Likewise, resource availability and other environmental conditions such as temperature are also taken as fixed. Steady state can be illustrated with a simple transition matrix model. Although there are initially 1000 individuals in the first age class (e.g. a mass hatching event triggered by rain), the age classes eventually stabilise.</p>
@@ -45,7 +47,7 @@ for(t in 2:Tmax) N[, t] = N[, t-1] %*% trans</code></pre>
 <div id="measuring-intrinsic-growth-rate" class="section level2">
 <h2>Measuring intrinsic growth rate</h2>
 <p>There are a number of ways that <span class="math inline">\(r\)</span> can be measured, but they all rely on the above assumptions.</p>
-<div id="regressing-population-vs.time" class="section level3">
+<div id="regressing-population-vs.-time" class="section level3">
 <h3>Regressing population vs. time</h3>
 <p>The most direct way to access <span class="math inline">\(r\)</span> is to look at how an unconstrained growing population changes through time. Let’s use the numbers from our previous matrix model simulation.</p>
 <pre class="r"><code>df = data.frame(
@@ -115,7 +117,9 @@ knitr::kable(df[seq(0,200, by = 20),],digits = 0, align = c(&#39;r&#39;,&#39;r&#
 </tbody>
 </table>
 <p>To estimate <span class="math inline">\(r\)</span> through regression, notice that a log tranformation of the growth function results in:</p>
-<p><span class="math display">\[\ln N = \ln  (N_0 e^{rt})\]</span> <span class="math display">\[\ln N = \ln N_0 + rt\]</span> This is a linear regression with an intercept <span class="math inline">\(\ln N_0\)</span> and slope <span class="math inline">\(r\)</span> which we can recover through fitting a simple linear model.</p>
+<p><span class="math display">\[\ln N = \ln  (N_0 e^{rt})\]</span>
+<span class="math display">\[\ln N = \ln N_0 + rt\]</span>
+This is a linear regression with an intercept <span class="math inline">\(\ln N_0\)</span> and slope <span class="math inline">\(r\)</span> which we can recover through fitting a simple linear model.</p>
 <pre class="r"><code>lm1 = lm(log(N) ~ t , data = df)
 coef(lm1)</code></pre>
 <pre><code>## (Intercept)           t 
@@ -146,7 +150,7 @@ coef(lm1)</code></pre>
 <div id="measuring-vital-rates-and-building-a-life-table" class="section level3">
 <h3>Measuring vital rates and building a life table</h3>
 <p>Old school population demographers also built life tables for a cohort of individuals followed through life, which include direct measurements of mortality, and reproduction to calculate <span class="math inline">\(r\)</span>.</p>
-<p>Let’s use an example published by Carey and Bradley<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> of the Atlantic Spider mite. The below table shows for each day <span class="math inline">\(x\)</span> the proportion surviving <span class="math inline">\(P(x)\)</span> and mean daily reproduction rate per individual for a synchronised cohort through time starting at egg lay.</p>
+<p>Let’s use an example published by Carey and Bradley<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> of the Atlantic Spider mite. The below table shows for each day <span class="math inline">\(x\)</span> the proportion surviving <span class="math inline">\(P(x)\)</span> and mean daily reproduction rate per individual for a synchronised cohort through time starting at egg lay.</p>
 <table>
 <thead>
 <tr class="header">
@@ -293,14 +297,16 @@ coef(lm1)</code></pre>
 <p>An analytical estimate of r from this data relies on the Lotka equation.</p>
 <p><span class="math display">\[\sum_{x=\alpha}^\beta P(x)m(x)e^{-rx} = 1\]</span></p>
 <p>Here we can set <span class="math inline">\(x = T\)</span> where</p>
-<p><span class="math display">\[T = \frac{\sum_{x}xP(x)m(x)}{\sum_{x}P(x)m(x)}\]</span> Substituting into the Lotka equation and recognisign <span class="math inline">\(\sum_{x}P(x)m(x) = R_0\)</span> we get :</p>
-<p><span class="math display">\[e^{rT} \approx R_0\]</span> <span class="math display">\[r \approx \ln R_0/ T\]</span></p>
+<p><span class="math display">\[T = \frac{\sum_{x}xP(x)m(x)}{\sum_{x}P(x)m(x)}\]</span>
+Substituting into the Lotka equation and recognisign <span class="math inline">\(\sum_{x}P(x)m(x) = R_0\)</span> we get :</p>
+<p><span class="math display">\[e^{rT} \approx R_0\]</span>
+<span class="math display">\[r \approx \ln R_0/ T\]</span></p>
 <p>Alternatively, we can <a href="https://scipython.com/book/chapter-8-scipy/examples/solving-the-euler-lotka-equation/">solve this equation numerically.</a></p>
 </div>
 </div>
 <div class="footnotes">
 <hr />
 <ol>
-<li id="fn1"><p>Carey, J.R. and Bradley, J.W., 1982. Developmental rates, vital schedules, sex ratios and life tables for Tetranychus urticae, T. turkestani and T. pacificus (Acarina: Tetranychidae) on cotton. Acarologia, 23(4), pp.333-345.<a href="#fnref1">↩</a></p></li>
+<li id="fn1"><p>Carey, J.R. and Bradley, J.W., 1982. Developmental rates, vital schedules, sex ratios and life tables for Tetranychus urticae, T. turkestani and T. pacificus (Acarina: Tetranychidae) on cotton. Acarologia, 23(4), pp.333-345.<a href="#fnref1" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
