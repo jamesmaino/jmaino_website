@@ -1,0 +1,69 @@
+---
+title: Mapping agricultural land usage in the US from census data
+author: ~
+date: '2019-08-28'
+slug: mapping-land-usage-in-the-us
+categories: ["R"]
+tags: ["agriculture", "horticulture", "climate", "ecology", "database", "R"]
+header:
+  caption: 'hayplum'
+  image: 'strawberries.jpg'
+  preview: yes
+---
+
+
+
+<p>Where do we grow things? This is an important question that can be answered in a few ways, but a more direct way is to just ask growers. This is what they did at a national scale in the 2017 United States’ Agriculture Census and here I am going to use R to load it, filter it, and plot the result.</p>
+<p>To start we need to <a href="https://www.nass.usda.gov/Publications/AgCensus/2017/Online_Resources/Census_Data_Query_Tool/2017_cdqt_data.txt.gz">download the data</a> and the shape file of the USA <a href="https://www.nass.usda.gov/Publications/AgCensus/2017/Online_Resources/Ag_Atlas_Maps/mapfiles/CoGenAll17_WGS84WMAS.zip">counties</a> (or <a href="https://www.nass.usda.gov/Publications/AgCensus/2017/Online_Resources/Ag_Atlas_Maps/mapfiles/StGenAll17_WGS84WMAS.zip">states</a>). I am using counties here. You will need to extract the compressed files using a program like <a href="https://www.7-zip.org/">7zip</a>.</p>
+<p>Then we load the shapefile and census data into R.</p>
+<pre class="r"><code>library(tidyverse)
+library(sf)
+library(tmap)
+
+# county shape file
+usa_county = st_read(&quot;data/USA land usage/US_counties/CoUS17_WGS84WMAS.shp&quot;) %&gt;% 
+  mutate(county = atlas_caps)</code></pre>
+<pre><code>## Reading layer `CoUS17_WGS84WMAS&#39; from data source `C:\Users\james\Documents\git\jmaino_website\content\post\data\USA land usage\US_counties\CoUS17_WGS84WMAS.shp&#39; using driver `ESRI Shapefile&#39;
+## Simple feature collection with 3070 features and 8 fields
+## geometry type:  MULTIPOLYGON
+## dimension:      XY
+## bbox:           xmin: -13884420 ymin: 2820030 xmax: -7452828 ymax: 6340332
+## epsg (SRID):    3857
+## proj4string:    +proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs</code></pre>
+<pre class="r"><code># load 2017 ag census data
+col_names = c(&#39;y1&#39;,&#39;y2&#39;,&#39;y3&#39;,&#39;y4&#39;,&#39;commodity&#39;,&#39;data_item&#39;,&#39;y5&#39;,&#39;region_level&#39;,&#39;state_no&#39;, &#39;state_code&#39;, &#39;state&#39;,
+              &#39;cntya&#39;,&#39;county&#39;,&#39;domain_category&#39;,&#39;value&#39;)
+d = read_delim(&quot;data/USA land usage/2017-census-data.txt&quot;, delim = &quot;\t&quot;, col_names = col_names)</code></pre>
+<p>A little bit of filtering is needed as there is other data besides land usage in the census.</p>
+<pre class="r"><code># make shapefile with state level commodity acreage
+commods = d %&gt;% 
+  filter(commodity == &quot;CROPS&quot;) %&gt;% 
+  # distinct(data_item) %&gt;% View
+  filter(data_item %in% paste0(c(&quot;BLUEBERRIES&quot;, &quot;GRAPES&quot;,   &quot;CHERRIES, SWEET&quot;, 
+                                &quot;STRAWBERRIES&quot;, &quot;RASPBERRIES, RED&quot;, &quot;RASPBERRIES, BLACK&quot;), &quot; - ACRES BEARING&quot;)) %&gt;% 
+  filter(region_level == &quot;COUNTY&quot;) %&gt;% 
+  filter(!is.na(value)) %&gt;% 
+  filter(is.na(domain_category)) %&gt;%  
+  mutate(atlas_stco = paste0(state_no, cntya)) %&gt;% 
+  distinct(data_item, atlas_stco, value) %&gt;% 
+  spread(key = data_item, value = value)</code></pre>
+<p>I had to create a variable from state code and county code which is then used to match each county to its respective polygon in the shapefile.</p>
+<pre class="r"><code>county_commods = usa_county %&gt;% 
+  left_join(commods, by = &quot;atlas_stco&quot;)</code></pre>
+<p>At the counties consist of different land areas, it makes sense to scale the acres bearing of each commodities by the total acreage of the state.</p>
+<p>So here are where the strawberries are.</p>
+<pre class="r"><code>county_commods %&gt;% 
+  mutate(`Proportion of land strawberries` = `STRAWBERRIES - ACRES BEARING`/atlas_acre) %&gt;%
+tm_shape() + 
+  tm_fill(col = &quot;Proportion of land strawberries&quot;, palette = &quot;Reds&quot;, style = &quot;cont&quot;, 
+          breaks = 10^seq(-8,-1), showNA = F, colorNA = &quot;white&quot;) + 
+  tm_borders(col = &quot;grey&quot;)</code></pre>
+<p><img src="/post/2019-08-28-mapping-land-usage-in-the-us_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>And here are where the blueberries are.</p>
+<pre class="r"><code>county_commods %&gt;% 
+  mutate(`Proportion of land blueberries` = `BLUEBERRIES - ACRES BEARING`/atlas_acre) %&gt;%
+tm_shape() + 
+  tm_fill(col = &quot;Proportion of land blueberries&quot;, palette = &quot;Blues&quot;, style = &quot;cont&quot;, 
+          breaks = 10^seq(-7,-2), showNA = F, colorNA = &quot;white&quot;) + 
+  tm_borders(col = &quot;grey&quot;)</code></pre>
+<p><img src="/post/2019-08-28-mapping-land-usage-in-the-us_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
