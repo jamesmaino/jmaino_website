@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 source('data/useful_scripts/mydarktheme.R')
 ```
 
-Soil structure and health is critical to [water availability, nutrient cycling, and plant productivity](https://www.youtube.com/watch?v=iD2DXBERTeg). By extension, soils will have strong associations with invertebrate community assemblage, diversity, and abundance and is thus a invertebrate science. 
+Soil structure and health is critical to [water availability, nutrient cycling, and plant productivity](https://www.youtube.com/watch?v=iD2DXBERTeg). By extension, soils will have strong associations with invertebrate community assemblage, diversity, and abundance. 
 
 Modern spatial datasets on soil are available to help us intergrate variation in soil characteristics in the prediction of invertebrate processes. In Austalia, one of the newer soil data sets is [Soil and Landscape grid of Australia](http://www.clw.csiro.au/aclep/soilandlandscapegrid/index.html). The data set is available as gridded rasters with a cell resolution of 3" (roughly 90m) and contains a range of variables including Bulk Density (Whole Earth), Organic Carbon, Clay, Silt, Sand, pH, and more. In addition, the data product includes information of landscape level variables such as Aspect, Relief 1000m Radius, Relief 300m Radius, Topographic Wetness Index, Topographic Position Index, and more. See the home page for more details.  
 

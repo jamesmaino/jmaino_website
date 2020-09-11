@@ -21,9 +21,9 @@ header:
 <p>As with the prey, the predator population growth <span class="math inline">\(\frac{dP}{dt}\)</span>, will be proportional to the reproduction rate minus mortality. Per capita predator reproduction can be assumed to depend on the amount of prey ingested multiplied by some efficiency constant <span class="math inline">\(e\)</span> or <span class="math inline">\(eaN\)</span>, with per capita mortality simply a constant <span class="math inline">\(m\)</span> which together makes:</p>
 <p><span class="math inline">\(\frac{dP}{dt} = (eaN - b)P\)</span></p>
 <p>As these populations depend on each other, both equations are needed to describe how the system changes through time. This is called a system of differential equations. As before, we can use the <code>deSolve</code> R package to numerically solve the situation were <span class="math inline">\(r = 0.3\)</span> (prey pop growth rate), <span class="math inline">\(a = 0.1\)</span> (predator ingestion rate per prey), <span class="math inline">\(b = 0.4\)</span> (predator mortality rate), and <span class="math inline">\(e = 0.5\)</span> (conversion efficiency of prey to predators).</p>
-<pre class="r"><code>library(deSolve)
-
-parameters &lt;- c(r = 0.3, a = 0.1, b = 0.4, e = 0.5)
+<pre class="r"><code>library(deSolve)</code></pre>
+<pre><code>## Warning: package &#39;deSolve&#39; was built under R version 4.0.2</code></pre>
+<pre class="r"><code>parameters &lt;- c(r = 0.3, a = 0.1, b = 0.4, e = 0.5)
 state &lt;- c(N = 2, P = 2)
 lotka_volterra &lt;- function(t, state, parameters) {
   with(as.list(c(state, parameters)), {

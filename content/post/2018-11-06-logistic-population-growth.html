@@ -21,9 +21,9 @@ header:
 <p><span class="math display">\[\frac{dN}{dt} = (1 - N/K)rN\]</span></p>
 <p>When <span class="math inline">\(N\)</span> is small the growth rate is approximately <span class="math inline">\(rN\)</span> but as <span class="math inline">\(N \to K\)</span> the growth rate scales to zero. Thus <span class="math inline">\(K\)</span> can be thought of as the carrying capacity of the population. It is important to note that unlike the equation for unconstrained exponential growth, this is a function of convenience rather than having mechanistic interpretation based on how reproduction or mortality depend on population density - it is the simplest function that satisfies our requirements for density dependent growth.</p>
 <p>Before we solve this equation with maths (analytically), let’s solve it using computers (numerically) for <span class="math inline">\(r=0.3\)</span>, and <span class="math inline">\(K=100\)</span> assuming the population started with just 2 individuals.</p>
-<pre class="r"><code>library(deSolve)
-
-parameters &lt;- c(r = 0.3, K = 100)
+<pre class="r"><code>library(deSolve)</code></pre>
+<pre><code>## Warning: package &#39;deSolve&#39; was built under R version 4.0.2</code></pre>
+<pre class="r"><code>parameters &lt;- c(r = 0.3, K = 100)
 state &lt;- c(N = 2)
 logistic &lt;- function(t, state, parameters) {
   with(as.list(c(state, parameters)), {
