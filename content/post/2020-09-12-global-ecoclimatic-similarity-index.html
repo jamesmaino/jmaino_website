@@ -1,0 +1,286 @@
+---
+title: Global ecoclimatic similarity index
+author: ~
+date: '2020-09-12'
+slug: global-ecoclimatic-similarity-index
+categories: ["R"]
+tags: ["agriculture", "horticulture", "climate", "ecology", "database", "R"]
+header:
+  caption: 'Climatic similarity'
+  image: 'climatic_similarity.png'
+  preview: yes
+---
+
+
+
+<p>Where are climatically similar locations?</p>
+<p>This is not a straightforward question because a range of conditions contribute to climate including rainfall, temperature, and the seasonal and daily variation in these properties.</p>
+<p>A key set of spatial data that contains useful information on these ecoclimatic properties are the BIOCLIM variables frequently used in species distributinon models.</p>
+<p>We can <a href="https://www.worldclim.org/data/worldclim21.html">download the data</a> which contains the following variables.</p>
+<pre class="r"><code>library(tidyverse)
+&quot;data/bioclim/bioclim_var_description.csv&quot; %&gt;% 
+  read_csv() %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">var</th>
+<th align="left">desc</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">bio01</td>
+<td align="left">Annual Mean Temperature</td>
+</tr>
+<tr class="even">
+<td align="left">bio02</td>
+<td align="left">Mean Diurnal Range (Mean of monthly (max temp - min temp))</td>
+</tr>
+<tr class="odd">
+<td align="left">bio03</td>
+<td align="left">Isothermality (BIO2/BIO7) (×100)</td>
+</tr>
+<tr class="even">
+<td align="left">bio04</td>
+<td align="left">Temperature Seasonality (standard deviation ×100)</td>
+</tr>
+<tr class="odd">
+<td align="left">bio05</td>
+<td align="left">Max Temperature of Warmest Month</td>
+</tr>
+<tr class="even">
+<td align="left">bio06</td>
+<td align="left">Min Temperature of Coldest Month</td>
+</tr>
+<tr class="odd">
+<td align="left">bio07</td>
+<td align="left">Temperature Annual Range (BIO5-BIO6)</td>
+</tr>
+<tr class="even">
+<td align="left">bio08</td>
+<td align="left">Mean Temperature of Wettest Quarter</td>
+</tr>
+<tr class="odd">
+<td align="left">bio09</td>
+<td align="left">Mean Temperature of Driest Quarter</td>
+</tr>
+<tr class="even">
+<td align="left">bio10</td>
+<td align="left">Mean Temperature of Warmest Quarter</td>
+</tr>
+<tr class="odd">
+<td align="left">bio11</td>
+<td align="left">Mean Temperature of Coldest Quarter</td>
+</tr>
+<tr class="even">
+<td align="left">bio12</td>
+<td align="left">Annual Precipitation</td>
+</tr>
+<tr class="odd">
+<td align="left">bio13</td>
+<td align="left">Precipitation of Wettest Month</td>
+</tr>
+<tr class="even">
+<td align="left">bio14</td>
+<td align="left">Precipitation of Driest Month</td>
+</tr>
+<tr class="odd">
+<td align="left">bio15</td>
+<td align="left">Precipitation Seasonality (Coefficient of Variation)</td>
+</tr>
+<tr class="even">
+<td align="left">bio16</td>
+<td align="left">Precipitation of Wettest Quarter</td>
+</tr>
+<tr class="odd">
+<td align="left">bio17</td>
+<td align="left">Precipitation of Driest Quarter</td>
+</tr>
+<tr class="even">
+<td align="left">bio18</td>
+<td align="left">Precipitation of Warmest Quarter</td>
+</tr>
+<tr class="odd">
+<td align="left">bio19</td>
+<td align="left">Precipitation of Coldest Quarter</td>
+</tr>
+</tbody>
+</table>
+<p>We can load this data into R and plot them for Australia.</p>
+<pre class="r"><code>library(sf)
+library(tmap)
+library(raster)
+
+# rough Australia shapefile
+data(World)
+aus = World %&gt;% 
+  filter(name == &quot;Australia&quot;) %&gt;% 
+  st_transform(crs=4326)
+World = World %&gt;% filter(continent != &quot;Antarctica&quot;)
+
+# load bioclim variables
+bioclim = stack(list.files(&quot;data/bioclim/&quot;, pattern = &quot;.tif&quot;, full.names=T))
+bioclim = crop(bioclim, extent(-180,180,-50,50))
+names(bioclim) = str_pad(str_extract(names(bioclim), pattern = &quot;(?&lt;=bio_)\\d+&quot;), 2, &quot;left&quot;, &quot;0&quot;)
+bioclim = bioclim[[order(gsub(&quot;X&quot;,&quot;&quot;, names(bioclim)))]]
+names(bioclim) = gsub(&quot;X&quot;, &quot;bio&quot;, names(bioclim))
+
+# bioclim
+tm_shape(crop(bioclim, aus)) + 
+  tm_raster(style = &quot;cont&quot;, pal=rainbow(10)) + 
+  tm_facets(free.scales = T) + 
+  tm_layout(outer.bg.color = &quot;black&quot;, )</code></pre>
+<p><img src="/post/2020-09-12-global-ecoclimatic-similarity-index_files/figure-html/unnamed-chunk-2-1.png" width="768" /></p>
+<p>Unfortunately, there are many variables to consider which makes visual comparisons of the similarity between locations difficult. Luckily, these variables are highly correlated with each other and we can extract the <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">principle component</a> and reduce the dimensionality and redundancy in the data.</p>
+<p>We can see that the first princple components can explain 83% of the variation in the data.</p>
+<pre class="r"><code>vals = values(bioclim)
+vals = vals[complete.cases(vals), ]
+pc = princomp(vals, scores = T)
+
+tibble(Component =1:19, Variance = (pc$sdev^2)) %&gt;% 
+  mutate(Proportion = Variance/sum(Variance)) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Component</th>
+<th align="right">Variance</th>
+<th align="right">Proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">9.117532e+05</td>
+<td align="right">0.8344917</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">1.021896e+05</td>
+<td align="right">0.0935301</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">4.469786e+04</td>
+<td align="right">0.0409102</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">2.342313e+04</td>
+<td align="right">0.0214383</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="right">7.654384e+03</td>
+<td align="right">0.0070058</td>
+</tr>
+<tr class="even">
+<td align="right">6</td>
+<td align="right">1.714997e+03</td>
+<td align="right">0.0015697</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">6.085929e+02</td>
+<td align="right">0.0005570</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="right">2.377121e+02</td>
+<td align="right">0.0002176</td>
+</tr>
+<tr class="odd">
+<td align="right">9</td>
+<td align="right">1.780822e+02</td>
+<td align="right">0.0001630</td>
+</tr>
+<tr class="even">
+<td align="right">10</td>
+<td align="right">5.842379e+01</td>
+<td align="right">0.0000535</td>
+</tr>
+<tr class="odd">
+<td align="right">11</td>
+<td align="right">4.159151e+01</td>
+<td align="right">0.0000381</td>
+</tr>
+<tr class="even">
+<td align="right">12</td>
+<td align="right">1.205113e+01</td>
+<td align="right">0.0000110</td>
+</tr>
+<tr class="odd">
+<td align="right">13</td>
+<td align="right">9.801420e+00</td>
+<td align="right">0.0000090</td>
+</tr>
+<tr class="even">
+<td align="right">14</td>
+<td align="right">4.912088e+00</td>
+<td align="right">0.0000045</td>
+</tr>
+<tr class="odd">
+<td align="right">15</td>
+<td align="right">4.633543e-01</td>
+<td align="right">0.0000004</td>
+</tr>
+<tr class="even">
+<td align="right">16</td>
+<td align="right">3.083914e-01</td>
+<td align="right">0.0000003</td>
+</tr>
+<tr class="odd">
+<td align="right">17</td>
+<td align="right">4.224400e-02</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="right">18</td>
+<td align="right">1.327750e-02</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="right">19</td>
+<td align="right">0.000000e+00</td>
+<td align="right">0.0000000</td>
+</tr>
+</tbody>
+</table>
+<p>We can these plot this axis of variation as 10 discrete quantiles for the globe.</p>
+<pre class="r"><code>pc1 = bioclim[[1]]
+names(pc1) = &quot;PC1&quot;
+pc1[!is.na(values(pc1))] = pc$scores[,1]
+
+tm_shape(pc1) + 
+  tm_raster(style=&quot;quantile&quot;, n = 8, stretch.palette = F, midpoint=0,
+            pal=RColorBrewer::brewer.pal(8, &quot;Set2&quot;))+ 
+  tm_layout(outer.bg.color = &quot;black&quot;)</code></pre>
+<p><img src="/post/2020-09-12-global-ecoclimatic-similarity-index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>The previous plot spans a huge range of conditions and we might want to focus on a particular location of interest such as Australia, Victoria, Grampians (Gariwerd). We can then compute the difference in pc1 scores between this location and other others. Here we truncate scores outside of those in the same decile of our location.</p>
+<pre class="r"><code># melbourne loction and score
+xy = matrix(c(144.946457, -37.840935), ncol=2)
+z  = raster::extract(pc1, xy) 
+diff = pc1 - z
+  
+legmax = quantile(abs(values(diff)), 0.1, na.rm=T)
+diff[values(diff) &gt;  legmax] = NA
+diff[values(diff) &lt; -legmax] = NA
+
+tm_shape(crop(diff, aus)) + 
+  tm_raster(title = &quot;PC1 (deviation from Melbourne)&quot;,
+            style=&quot;cont&quot;, n = 10, stretch.palette = F, midpoint=0,
+            pal=RColorBrewer::brewer.pal(10, &quot;RdYlGn&quot;)) +
+  tm_shape(aus) + 
+  tm_borders() +
+  tm_layout(outer.bg.color = &quot;black&quot;)</code></pre>
+<p><img src="/post/2020-09-12-global-ecoclimatic-similarity-index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>And for the world.</p>
+<pre class="r"><code>tm_shape(diff) + 
+  tm_raster(title = &quot;PC1 (deviation from Melbourne)&quot;, 
+            style=&quot;cont&quot;, n = 10, stretch.palette = F, midpoint=0,
+            pal=RColorBrewer::brewer.pal(10, &quot;RdYlGn&quot;)) + 
+  tm_shape(World) + 
+  tm_borders() +
+  tm_layout(outer.bg.color = &quot;black&quot;)</code></pre>
+<p><img src="/post/2020-09-12-global-ecoclimatic-similarity-index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
