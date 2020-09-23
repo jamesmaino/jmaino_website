@@ -24,6 +24,8 @@ This is not a straightforward question because a range of conditions contribute 
 A key set of spatial data that contains useful information on these ecoclimatic properties are the BIOCLIM variables frequently used in species distributinon models.  
 
 We can [download the data](https://www.worldclim.org/data/worldclim21.html) which contains the following variables. 
+ 
+ 
 
 ```{r}
 library(tidyverse)
