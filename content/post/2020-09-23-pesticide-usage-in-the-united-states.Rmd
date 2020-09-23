@@ -1,0 +1,125 @@
+---
+title: Pesticide usage in the United States
+author: ~
+date: '2020-09-23'
+slug: pesticide-usage-in-the-united-states
+categories: ["R"]
+tags: ["agriculture", "horticulture", "ecology", "database", "R"]
+header:
+  caption: 'Neonicotinoid usage in the United States'
+  image: 'usa_pesticide_usage.png'
+  preview: yes
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+source('data/useful_scripts/mydarktheme.R')
+```
+
+The USGS had some [great data on pesticide usage in the United States](https://water.usgs.gov/nawqa/pnsp/usage/maps/county-level/) that causes great envy among Australian pest researchers. In this post we have a look at some of this data and present some spatial and temporal trends in an important pesticide group that has been the subject of much controversy in recent history. 
+
+Such data allows researchers to better estimate selection pressure for resistance evolution, as well as other off-target effects of pesticide usage.
+
+The USGS provides a low and high estimate of pesticide usage as per the methodology described [here](https://pubs.usgs.gov/sir/2013/5009/). For simplicity we use the lower estimate in the following. 
+
+First, we load the county level pesticide usage data and a shape file that allows matching of estimated neonicotinoid usage in space.  
+
+```{r}
+#Import libraries
+library(tidyverse)
+library(sf)
+library(tmap)
+
+# Common neonicotinoid compounds
+neonics = toupper(
+  c("acetamiprid", "clothianidin", "dinotefuran", "imidacloprid", "thiamethoxam"))
+
+# US pesticide usage
+us = "data/USA land usage/US_pesticide_usage/EPest.county.estimates.2016.txt" %>% 
+  read_delim(delim = "\t") %>%
+  mutate(atlas_stco = paste0(STATE_FIPS_CODE, COUNTY_FIPS_CODE)) %>% 
+  mutate(usage_kg = EPEST_LOW_KG) %>% 
+  filter(COMPOUND %in% neonics) %>% 
+  group_by(atlas_stco) %>% 
+  summarise(usage_kg = sum(usage_kg, na.rm=T))
+
+# US shape file
+shp = st_read("data/USA land usage/US_counties/CoUS17_WGS84WMAS.shp") 
+
+# join usage to shape file for chem and scale for usage intensity
+uspest = shp %>% 
+  mutate(atlas_ha = atlas_acre * 0.404686) %>% # metric FTW
+  left_join(us) %>% 
+  mutate(usage_g_ha = 1e3*usage_kg/atlas_ha)
+
+```
+
+Then after scaling neonicotinoid usage by county area to estimate usage intensity, we can plot this data on a linear scale, and then a log scale to better see variation
+
+```{r}
+# range of values
+logrange = uspest %>% 
+  filter(! (is.na(usage_g_ha)|usage_g_ha==0)) %>%
+  pull(usage_g_ha) %>% 
+  log10 %>% 
+  range %>%
+  round
+
+# plot usage intensity
+pal = rev(viridis::magma(10))
+mytmtheme = tm_layout(legend.position = c("right", "bottom"), bg.color = "#37314a",
+            scale = 0.5,outer.bg.color = "#37314a", frame = F)
+# linear
+tm_shape(uspest) + 
+  tm_fill(col="usage_g_ha", title = "County level 2016\nneonicotinoid usage (g/ha)",
+          style = "cont", palette = pal) +
+  mytmtheme
+#log
+tm_shape(uspest) + 
+  tm_fill(col="usage_g_ha", title = "County level 2016\nneonicotinoid usage (g/ha)",
+          style = "cont", breaks = 10^(logrange[1]:logrange[2]), palette = pal) +
+  mytmtheme
+```
+
+The USGS provides historical data through time at a crop level that allows us to look at trends in usage the crop level. 
+
+Here we can see that neonicotinoid usage increased rapidly but dropped off precipitously after 2014. Soybean and corn production account for most neonicotinoid usage in the United States.
+
+
+```{r}
+
+# get usage by crop type through time
+crop_usage = 
+  "data/USA land usage/US_pesticide_usage/LowEstimate_AgPestUsebyCropGroup92to16.txt" %>% read_delim(delim = "\t") %>%
+  filter(Compound %in% neonics) %>%
+  gather(crop, usage, -State_FIPS_code, -State, -Compound, -Year, -Units) %>% 
+  group_by(crop, Year) %>%
+  summarise(usage_t = sum(usage, na.rm=T)/1e3, .groups="drop")
+
+# plot usage by crop type through time
+crop_usage %>% 
+  mutate(crop = gsub("_", " ", crop)) %>%
+  ggplot(aes(Year, usage_t, color=reorder(crop, desc(usage_t)))) + 
+  geom_line(stat="identity", size=1) + 
+  # theme_bw() + 
+  mydarktheme +
+  theme(panel.background = element_blank()) +
+  scale_color_manual(values=rainbow(10, s = 0.5)) +
+  ylab("Neonicotinoid usage (tonnes)") + 
+  guides(color = guide_legend(""))
+
+```
+
+Total neonicotinoid usage by year is summarised in the following table.  
+
+```{r}
+# total usage
+crop_usage %>% 
+  group_by(Year) %>% 
+  summarise(`Neonicotinoid Usage (tonnes)` = sum(usage_t, na.rm=T), 
+            .groups="drop") %>% 
+  arrange(desc(Year)) %>% 
+  knitr::kable()
+```
+
+
