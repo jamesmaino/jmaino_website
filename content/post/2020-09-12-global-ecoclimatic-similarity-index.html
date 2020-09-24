@@ -16,7 +16,7 @@ header:
 <p>Where are climatically similar locations?</p>
 <p>This is not a straightforward question because a range of conditions contribute to climate including rainfall, temperature, and the seasonal and daily variation in these properties.</p>
 <p>A key set of spatial data that contains useful information on these ecoclimatic properties are the BIOCLIM variables frequently used in species distributinon models.</p>
-<p>We can <a href="https://www.worldclim.org/data/worldclim21.html">download the data</a> which contains the following variables.</p>
+<p>We can <a href="https://www.worldclim.org/data/worldclim21.html">download the data</a> which contain the following variables.</p>
 <pre class="r"><code>library(tidyverse)
 &quot;data/bioclim/bioclim_var_description.csv&quot; %&gt;% 
   read_csv() %&gt;% 
@@ -126,14 +126,18 @@ names(bioclim) = str_pad(str_extract(names(bioclim), pattern = &quot;(?&lt;=bio_
 bioclim = bioclim[[order(gsub(&quot;X&quot;,&quot;&quot;, names(bioclim)))]]
 names(bioclim) = gsub(&quot;X&quot;, &quot;bio&quot;, names(bioclim))
 
+# make plot theme
+mytmtheme = tm_layout(legend.position = c(&quot;left&quot;, &quot;bottom&quot;), bg.color = &quot;#37314a&quot;,
+            scale = 0.5,outer.bg.color = &quot;#37314a&quot;, frame = F)
+
 # bioclim
 tm_shape(crop(bioclim, aus)) + 
   tm_raster(style = &quot;cont&quot;, pal=rainbow(10)) + 
   tm_facets(free.scales = T) + 
-  tm_layout(outer.bg.color = &quot;black&quot;, )</code></pre>
+  mytmtheme</code></pre>
 <p><img src="/post/2020-09-12-global-ecoclimatic-similarity-index_files/figure-html/unnamed-chunk-2-1.png" width="768" /></p>
 <p>Unfortunately, there are many variables to consider which makes visual comparisons of the similarity between locations difficult. Luckily, these variables are highly correlated with each other and we can extract the <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">principle component</a> and reduce the dimensionality and redundancy in the data.</p>
-<p>We can see that the first princple components can explain 83% of the variation in the data.</p>
+<p>We can see that the first princple component explains 83% of the variation in the data.</p>
 <pre class="r"><code>vals = values(bioclim)
 vals = vals[complete.cases(vals), ]
 pc = princomp(vals, scores = T)
@@ -247,7 +251,7 @@ tibble(Component =1:19, Variance = (pc$sdev^2)) %&gt;%
 </tr>
 </tbody>
 </table>
-<p>We can these plot this axis of variation as 10 discrete quantiles for the globe.</p>
+<p>We can plot this axis of variation as 10 discrete quantiles for the world</p>
 <pre class="r"><code>pc1 = bioclim[[1]]
 names(pc1) = &quot;PC1&quot;
 pc1[!is.na(values(pc1))] = pc$scores[,1]
@@ -255,9 +259,9 @@ pc1[!is.na(values(pc1))] = pc$scores[,1]
 tm_shape(pc1) + 
   tm_raster(style=&quot;quantile&quot;, n = 8, stretch.palette = F, midpoint=0,
             pal=RColorBrewer::brewer.pal(8, &quot;Set2&quot;))+ 
-  tm_layout(outer.bg.color = &quot;black&quot;)</code></pre>
+  mytmtheme</code></pre>
 <p><img src="/post/2020-09-12-global-ecoclimatic-similarity-index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>The previous plot spans a huge range of conditions and we might want to focus on a particular location of interest such as Australia, Victoria, Grampians (Gariwerd). We can then compute the difference in pc1 scores between this location and other others. Here we truncate scores outside of those in the same decile of our location.</p>
+<p>The previous plot spans a huge range of conditions and we might want to focus on a particular location of interest such as Australia, Victoria, Melbourne. We can then compute the difference in PC1 scores between this location and other others. Here we truncate scores outside of those in the same decile of our location.</p>
 <pre class="r"><code># melbourne loction and score
 xy = matrix(c(144.946457, -37.840935), ncol=2)
 z  = raster::extract(pc1, xy) 
@@ -267,20 +271,20 @@ legmax = quantile(abs(values(diff)), 0.1, na.rm=T)
 diff[values(diff) &gt;  legmax] = NA
 diff[values(diff) &lt; -legmax] = NA
 
-tm_shape(crop(diff, aus)) + 
+tm_shape(aus) + 
+  tm_fill(&quot;grey&quot;) +
+  tm_shape(crop(diff, aus)) + 
   tm_raster(title = &quot;PC1 (deviation from Melbourne)&quot;,
             style=&quot;cont&quot;, n = 10, stretch.palette = F, midpoint=0,
             pal=RColorBrewer::brewer.pal(10, &quot;RdYlGn&quot;)) +
-  tm_shape(aus) + 
-  tm_borders() +
-  tm_layout(outer.bg.color = &quot;black&quot;)</code></pre>
+  mytmtheme</code></pre>
 <p><img src="/post/2020-09-12-global-ecoclimatic-similarity-index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>And for the world.</p>
-<pre class="r"><code>tm_shape(diff) + 
+<pre class="r"><code>tm_shape(World) + 
+  tm_fill(&quot;grey&quot;) +
+  tm_shape(diff, is.master = T) + 
   tm_raster(title = &quot;PC1 (deviation from Melbourne)&quot;, 
             style=&quot;cont&quot;, n = 10, stretch.palette = F, midpoint=0,
             pal=RColorBrewer::brewer.pal(10, &quot;RdYlGn&quot;)) + 
-  tm_shape(World) + 
-  tm_borders() +
-  tm_layout(outer.bg.color = &quot;black&quot;)</code></pre>
+  mytmtheme</code></pre>
 <p><img src="/post/2020-09-12-global-ecoclimatic-similarity-index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
